@@ -1,0 +1,23 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const authMiddleware_1 = require("../middlewares/authMiddleware");
+const roleMiddleware_1 = require("../middlewares/roleMiddleware");
+const adminController_1 = require("../controller/adminController");
+const adminRouter = express_1.default.Router();
+adminRouter.use(authMiddleware_1.verifyToken);
+adminRouter.use((0, roleMiddleware_1.authorizeRole)("ADMIN"));
+adminRouter.post("/create-student", (req, res) => (0, adminController_1.createStudent)(req, res));
+adminRouter.get("/students", (req, res) => (0, adminController_1.getStudents)(req, res));
+adminRouter.get("/student/:id", (req, res) => (0, adminController_1.getSingleStudent)(req, res));
+adminRouter.post("/create-warden", (req, res) => (0, adminController_1.createWarden)(req, res));
+adminRouter.get("/wardens", (req, res) => (0, adminController_1.getwardens)(req, res));
+adminRouter.get("/warden/:id", (req, res) => (0, adminController_1.getSingleWarden)(req, res));
+adminRouter.delete("/student/:id", (req, res) => (0, adminController_1.deleteStudent)(req, res));
+adminRouter.delete("/warden/:id", (req, res) => (0, adminController_1.deleteWarden)(req, res));
+adminRouter.put("/student/:id", (req, res) => (0, adminController_1.updateStudent)(req, res));
+adminRouter.put("/warden/:id", (req, res) => updateWarden(req, res));
+exports.default = adminRouter;

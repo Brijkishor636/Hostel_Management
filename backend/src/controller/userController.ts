@@ -1,9 +1,9 @@
 import {Request, Response} from "express";
-import { signinInput } from "../input";
 import { PrismaClient } from "@prisma/client";
 import jwt, { Secret } from "jsonwebtoken";
 import { getDashboardForRole } from "../utils/roleDashboard";
 import bcrypt from "bcryptjs";
+import { signinInput } from "../inputs/authInput";
 
 const prisma = new PrismaClient();
 
@@ -94,12 +94,12 @@ export const changePassword = async (req: Request, res: Response) =>{
                 msg: "oldPassword is incorrect!!"
             })
         }
-        const hashPassword = await bcrypt.hash(newPassword, 10);
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
         await prisma.user.update({
             where: {
                 id: userId
             },data:{
-                password: hashPassword
+                password: hashedPassword
             }
         })
         return res.status(200).json({

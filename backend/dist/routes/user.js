@@ -18,5 +18,5 @@ const authMiddleware_1 = require("../middlewares/authMiddleware");
 const userRouter = express_1.default.Router();
 userRouter.post("/signin", (req, res) => __awaiter(void 0, void 0, void 0, function* () { return (0, userController_1.signin)(req, res); }));
 userRouter.post("/logout", (req, res) => (0, userController_1.logout)(req, res));
-userRouter.post("/change-password", authMiddleware_1.verifyToken, (req, res) => (0, userController_1.changePassword)(req, res));
+userRouter.put("/change-password", authMiddleware_1.verifyToken, (req, res) => (0, userController_1.changePassword)(req, res));
 exports.default = userRouter;

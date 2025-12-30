@@ -13,15 +13,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.changePassword = exports.logout = exports.signin = void 0;
-const input_1 = require("../input");
 const client_1 = require("@prisma/client");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const roleDashboard_1 = require("../utils/roleDashboard");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const authInput_1 = require("../inputs/authInput");
 const prisma = new client_1.PrismaClient();
 const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const parsed = input_1.signinInput.safeParse(req.body);
+        const parsed = authInput_1.signinInput.safeParse(req.body);
         if (!parsed.success) {
             return res.status(400).json({
                 msg: "Invalid input data"
@@ -96,12 +96,12 @@ const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 msg: "oldPassword is incorrect!!"
             });
         }
-        const hashPassword = yield bcryptjs_1.default.hash(newPassword, 10);
+        const hashedPassword = yield bcryptjs_1.default.hash(newPassword, 10);
         yield prisma.user.update({
             where: {
                 id: userId
             }, data: {
-                password: hashPassword
+                password: hashedPassword
             }
         });
         return res.status(200).json({
