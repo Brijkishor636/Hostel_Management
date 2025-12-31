@@ -15,6 +15,6 @@ exports.createStudentInput = zod_1.default.object({
 exports.updateStudentSchema = zod_1.default.object({
     name: zod_1.default.string().optional(),
     mobNo: zod_1.default.string().optional(),
-    regNo: zod_1.default.string(),
+    regNo: zod_1.default.string().optional(),
     isActive: zod_1.default.boolean().optional()
 });

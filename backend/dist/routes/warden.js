@@ -1,0 +1,20 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const adminController_1 = require("../controller/adminController");
+const authMiddleware_1 = require("../middlewares/authMiddleware");
+const roleMiddleware_1 = require("../middlewares/roleMiddleware");
+const userController_1 = require("../controller/userController");
+const wardenRouter = express_1.default.Router();
+wardenRouter.use(authMiddleware_1.verifyToken);
+wardenRouter.use((0, roleMiddleware_1.authorizeRole)("WARDEN"));
+wardenRouter.post("/create-student", (req, res) => (0, adminController_1.createStudent)(req, res));
+wardenRouter.get("/students", (req, res) => (0, adminController_1.getStudents)(req, res));
+wardenRouter.get("/student/:id", (req, res) => (0, adminController_1.getSingleStudent)(req, res));
+wardenRouter.put("/student/:id", (req, res) => (0, adminController_1.updateStudent)(req, res));
+wardenRouter.put("/update-selfprofile", (req, res) => (0, userController_1.updateSelfProfile)(req, res));
+wardenRouter.get("/me", (req, res) => (0, userController_1.getSelfDetails)(req, res));
+exports.default = wardenRouter;

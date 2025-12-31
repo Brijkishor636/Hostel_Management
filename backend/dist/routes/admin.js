@@ -7,6 +7,7 @@ const express_1 = __importDefault(require("express"));
 const authMiddleware_1 = require("../middlewares/authMiddleware");
 const roleMiddleware_1 = require("../middlewares/roleMiddleware");
 const adminController_1 = require("../controller/adminController");
+const userController_1 = require("../controller/userController");
 const adminRouter = express_1.default.Router();
 adminRouter.use(authMiddleware_1.verifyToken);
 adminRouter.use((0, roleMiddleware_1.authorizeRole)("ADMIN"));
@@ -19,5 +20,8 @@ adminRouter.get("/warden/:id", (req, res) => (0, adminController_1.getSingleWard
 adminRouter.delete("/student/:id", (req, res) => (0, adminController_1.deleteStudent)(req, res));
 adminRouter.delete("/warden/:id", (req, res) => (0, adminController_1.deleteWarden)(req, res));
 adminRouter.put("/student/:id", (req, res) => (0, adminController_1.updateStudent)(req, res));
-adminRouter.put("/warden/:id", (req, res) => updateWarden(req, res));
+adminRouter.put("/user/:id", (req, res) => (0, adminController_1.updateUser)(req, res));
+adminRouter.get("/admins", (req, res) => (0, adminController_1.getAdmins)(req, res));
+adminRouter.get("/me", (req, res) => (0, userController_1.getSelfDetails)(req, res));
+adminRouter.put("/update-selfprofile", (req, res) => (0, userController_1.updateSelfProfile)(req, res));
 exports.default = adminRouter;

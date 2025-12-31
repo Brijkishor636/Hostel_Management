@@ -11,7 +11,7 @@ export const createStudentInput = z.object({
 export const updateStudentSchema = z.object({
     name: z.string().optional(),
     mobNo: z.string().optional(),
-    regNo: z.string(),
+    regNo: z.string().optional(),
     isActive: z.boolean().optional()
 });
 

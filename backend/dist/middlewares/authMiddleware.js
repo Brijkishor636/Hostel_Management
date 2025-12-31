@@ -17,10 +17,11 @@ const verifyToken = (req, res, next) => {
         const decoded = jsonwebtoken_1.default.verify(token, secretKey);
         if (typeof decoded === "object" && decoded !== null) {
             req.user = {
-                userId: decoded.userId,
+                id: decoded.userId,
                 role: decoded.role,
                 hostelId: decoded.hostelId
             };
+            // console.log(req.user);
             next();
         }
         else {

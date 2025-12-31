@@ -21,10 +21,11 @@ export const verifyToken = (req: Request, res: Response, next: NextFunction) =>{
         const decoded = jwt.verify(token, secretKey);
         if (typeof decoded === "object" && decoded !== null) {
             req.user = {
-                userId: (decoded as any).userId,
+                id: (decoded as any).userId,
                 role: (decoded as any).role,
                 hostelId: (decoded as any).hostelId
             };
+            // console.log(req.user);
             next();
         }
         else{

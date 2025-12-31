@@ -12,22 +12,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changePassword = exports.logout = exports.signin = void 0;
+exports.updateSelfProfile = exports.getSelfDetails = exports.changePassword = exports.logout = exports.signin = void 0;
 const client_1 = require("@prisma/client");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const roleDashboard_1 = require("../utils/roleDashboard");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const authInput_1 = require("../inputs/authInput");
+const userSelector_1 = require("../selectors/userSelector");
+const selfInput_1 = require("../inputs/selfInput");
 const prisma = new client_1.PrismaClient();
 const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const parsed = authInput_1.signinInput.safeParse(req.body);
+        // console.log(parsed.data);
         if (!parsed.success) {
             return res.status(400).json({
                 msg: "Invalid input data"
             });
         }
-        const user = yield prisma.user.findUnique({
+        const user = yield prisma.user.findFirst({
             where: { email: parsed.data.email }
         });
         if (!user || !(yield bcryptjs_1.default.compare(parsed.data.password, user.password))) {
@@ -44,7 +47,7 @@ const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
-            maxAge: 60 * 60 * 1000
+            maxAge: 24 * 60 * 60 * 1000
         });
         return res.status(200).json({
             msg: "Login successful",
@@ -116,3 +119,64 @@ const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.changePassword = changePassword;
+const getSelfDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        const selfDetail = yield prisma.user.findFirst({
+            where: { id: userId },
+            select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { hostel: {
+                    select: {
+                        name: true
+                    }
+                }, student: {
+                    select: {
+                        regNo: true
+                    }
+                } })
+        });
+        return res.status(200).json(selfDetail);
+    }
+    catch (e) {
+        console.log(e);
+        return res.status(500).json({
+            msg: "Internal server error!!"
+        });
+    }
+});
+exports.getSelfDetails = getSelfDetails;
+const updateSelfProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        const parsed = selfInput_1.updateSelfDetail.safeParse(req.body);
+        if (!parsed.success) {
+            return res.status(401).json({
+                msg: "Incorrect inputs!!"
+            });
+        }
+        yield prisma.user.update({
+            where: {
+                id: id
+            }, data: {
+                name: parsed.data.name,
+                mobNo: parsed.data.mobNo,
+                student: {
+                    update: {
+                        regNo: parsed.data.regNo
+                    }
+                }
+            }
+        });
+        return res.status(200).json({
+            msg: "User updated successfully.."
+        });
+    }
+    catch (e) {
+        console.log(e);
+        return res.status(500).json({
+            msg: "Internal server error!!"
+        });
+    }
+});
+exports.updateSelfProfile = updateSelfProfile;

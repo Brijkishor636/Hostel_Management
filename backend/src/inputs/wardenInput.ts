@@ -1,10 +1,17 @@
 import z, { email } from "zod";
 
-export const createWardenInput = z.object({
+export const createUserInput = z.object({
     name: z.string(),
     email: z.string().email(),
     password: z.string().min(4),
     mobNo: z.string()
 })
 
-export type createWardenInput = z.infer<typeof createWardenInput>
+export const updateUserInput = z.object({
+    name: z.string().optional(),
+    mobNo: z.string().optional(),
+    isActive: z.boolean().optional()
+})
+
+export type updateUserInput = z.infer<typeof updateUserInput>
+export type createUserInput = z.infer<typeof createUserInput>

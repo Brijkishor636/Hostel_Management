@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateWarden = exports.updateStudent = exports.deleteWarden = exports.deleteStudent = exports.getSingleWarden = exports.getwardens = exports.createWarden = exports.getSingleStudent = exports.getStudents = exports.createStudent = void 0;
+exports.getAdmins = exports.updateUser = exports.updateStudent = exports.deleteWarden = exports.deleteStudent = exports.getSingleWarden = exports.getwardens = exports.createWarden = exports.getSingleStudent = exports.getStudents = exports.createStudent = void 0;
 const studentInput_1 = require("../inputs/studentInput");
 const client_1 = require("@prisma/client");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
@@ -79,7 +79,11 @@ const getStudents = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 role: "STUDENT",
                 hostelId: hostelId,
                 isActive: true
-            }, select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { student: true })
+            }, select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { student: true, hostel: {
+                    select: {
+                        name: true
+                    }
+                } })
         });
         return res.status(200).json(allStudents);
     }
@@ -100,7 +104,11 @@ const getSingleStudent = (req, res) => __awaiter(void 0, void 0, void 0, functio
             where: {
                 id: id,
                 hostelId
-            }, select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { student: true })
+            }, select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { student: true, hostel: {
+                    select: {
+                        name: true
+                    }
+                } })
         });
         return res.status(200).json(student);
     }
@@ -114,7 +122,7 @@ exports.getSingleStudent = getSingleStudent;
 const createWarden = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const parsed = wardenInput_1.createWardenInput.safeParse(req.body);
+        const parsed = wardenInput_1.createUserInput.safeParse(req.body);
         const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
         if (!parsed.success) {
             return res.status(401).json({
@@ -141,7 +149,7 @@ const createWarden = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             }
         });
         return res.status(200).json({
-            msg: "Warden created successfully.."
+            msg: "User created successfully.."
         });
     }
     catch (e) {
@@ -162,7 +170,11 @@ const getwardens = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 hostelId: hostelId,
                 isActive: true
             },
-            select: Object.assign({}, userSelector_1.safeUserSelect)
+            select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { hostel: {
+                    select: {
+                        name: true
+                    }
+                } })
         });
         return res.status(200).json(allWardens);
     }
@@ -184,7 +196,11 @@ const getSingleWarden = (req, res) => __awaiter(void 0, void 0, void 0, function
                 id: id,
                 hostelId: hostelId
             },
-            select: Object.assign({}, userSelector_1.safeUserSelect)
+            select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { hostel: {
+                    select: {
+                        name: true
+                    }
+                } })
         });
         return res.status(200).json(singleWarden);
     }
@@ -287,7 +303,7 @@ const updateStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             }
         });
         if (!existStudent) {
-            return res.status(400).json({
+            return res.status(404).json({
                 msg: "Student not found!!"
             });
         }
@@ -313,6 +329,62 @@ const updateStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.updateStudent = updateStudent;
-const updateWarden = (req, res) => {
-};
-exports.updateWarden = updateWarden;
+const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const id = req.params.id;
+        const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
+        const parsed = wardenInput_1.updateUserInput.safeParse(req.body);
+        if (!parsed.success) {
+            return res.status(401).json({
+                msg: "Incorrect inputs!!"
+            });
+        }
+        const existWarden = yield prisma.user.findFirst({
+            where: { id: id, hostelId: hostelId }
+        });
+        if (!existWarden) {
+            return res.status(404).json({
+                msg: "user doesn't exists!!"
+            });
+        }
+        yield prisma.user.update({
+            where: { id: id },
+            data: {
+                name: parsed.data.name,
+                mobNo: parsed.data.mobNo,
+                isActive: parsed.data.isActive
+            }
+        });
+        return res.status(200).json({
+            msg: "User updated successfully.."
+        });
+    }
+    catch (e) {
+        console.log(e);
+        return res.status(500).json({
+            msg: "Internal server error!!"
+        });
+    }
+});
+exports.updateUser = updateUser;
+const getAdmins = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const allAdmin = yield prisma.user.findMany({
+            where: { role: "ADMIN" },
+            select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { hostel: {
+                    select: {
+                        name: true
+                    }
+                } })
+        });
+        return res.status(200).json(allAdmin);
+    }
+    catch (e) {
+        console.log(e);
+        return res.status(500).json({
+            msg: "Internal server error!!"
+        });
+    }
+});
+exports.getAdmins = getAdmins;

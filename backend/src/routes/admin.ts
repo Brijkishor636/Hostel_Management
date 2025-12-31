@@ -1,7 +1,8 @@
 import express, {Request, Response} from "express";
 import { verifyToken } from "../middlewares/authMiddleware";
 import { authorizeRole } from "../middlewares/roleMiddleware";
-import { createStudent, createWarden, deleteStudent, deleteWarden, getSingleStudent, getSingleWarden, getStudents, getwardens, updateStudent } from "../controller/adminController";
+import { createStudent, createWarden, deleteStudent, deleteWarden, getAdmins, getSingleStudent, getSingleWarden, getStudents, getwardens, updateStudent, updateUser} from "../controller/adminController";
+import { getSelfDetails, updateSelfProfile } from "../controller/userController";
 
 const adminRouter = express.Router();
 
@@ -26,7 +27,13 @@ adminRouter.delete("/warden/:id", (req: Request, res: Response) => deleteWarden(
 
 adminRouter.put("/student/:id", (req: Request, res: Response) => updateStudent(req, res));
 
-adminRouter.put("/warden/:id", (req: Request, res: Response) => updateWarden(req, res));
+adminRouter.put("/user/:id", (req: Request, res: Response) => updateUser(req, res));
+
+adminRouter.get("/admins", (req: Request, res: Response) => getAdmins(req, res));
+
+adminRouter.get("/me", (req: Request, res: Response) => getSelfDetails(req, res));
+
+adminRouter.put("/update-selfprofile", (req: Request, res: Response) => updateSelfProfile(req, res));
 
 
 export default adminRouter;

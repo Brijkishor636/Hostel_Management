@@ -4,19 +4,22 @@ import jwt, { Secret } from "jsonwebtoken";
 import { getDashboardForRole } from "../utils/roleDashboard";
 import bcrypt from "bcryptjs";
 import { signinInput } from "../inputs/authInput";
+import { safeUserSelect } from "../selectors/userSelector";
+import { updateSelfDetail } from "../inputs/selfInput";
 
 const prisma = new PrismaClient();
 
 export const signin = async (req: Request, res: Response) => {
   try {
     const parsed = signinInput.safeParse(req.body);
+    // console.log(parsed.data);
     if (!parsed.success) {
       return res.status(400).json({
         msg: "Invalid input data" 
     });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: { email: parsed.data.email }
     });
 
@@ -40,7 +43,7 @@ export const signin = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 60 * 60 * 1000
+      maxAge: 24 * 60 * 60 * 1000
     });
 
     return res.status(200).json({
@@ -112,4 +115,68 @@ export const changePassword = async (req: Request, res: Response) =>{
             msg: "Internal server error!!"
         })
     }
+}
+
+
+export const getSelfDetails = async (req: Request, res: Response) =>{
+  try{
+    const userId = req.user?.id;
+    const selfDetail = await prisma.user.findFirst({
+      where: {id : userId},
+      select: {
+        ...safeUserSelect,
+        hostel: {
+          select: {
+            name: true
+          }
+        },
+        student: {
+          select: {
+            regNo: true
+          }
+        }
+      }
+    })
+    return res.status(200).json(selfDetail);
+  }
+  catch(e){
+    console.log(e);
+    return res.status(500).json({
+      msg: "Internal server error!!"
+    })
+  }
+}
+
+export const updateSelfProfile = async (req: Request, res: Response) =>{
+  try{
+    const id = req.user?.id;
+    const parsed = updateSelfDetail.safeParse(req.body);
+    if(!parsed.success){
+      return res.status(401).json({
+        msg: "Incorrect inputs!!"
+      })
+    }
+    await prisma.user.update({
+      where: {
+        id: id
+      },data:{
+        name: parsed.data.name,
+        mobNo: parsed.data.mobNo,
+        student: {
+          update: {
+            regNo: parsed.data.regNo
+          }
+        }
+      }
+    })
+    return res.status(200).json({
+      msg: "User updated successfully.."
+    })
+  }
+  catch(e){
+    console.log(e);
+    return res.status(500).json({
+      msg: "Internal server error!!"
+    })
+  }
 }

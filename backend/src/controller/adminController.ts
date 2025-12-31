@@ -3,7 +3,7 @@ import { createStudentInput, updateStudentSchema } from "../inputs/studentInput"
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { safeUserSelect } from "../selectors/userSelector";
-import { createWardenInput } from "../inputs/wardenInput";
+import { createUserInput, updateUserInput} from "../inputs/wardenInput";
 
 const prisma = new PrismaClient();
 
@@ -68,7 +68,12 @@ export const getStudents = async (req: Request, res: Response) =>{
                 isActive: true
             },select:{
                 ...safeUserSelect,
-                student: true
+                student: true,
+                hostel: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         })
         return res.status(200).json(allStudents);
@@ -92,7 +97,12 @@ export const getSingleStudent = async (req: Request, res: Response) =>{
                 hostelId
             },select: {
                 ...safeUserSelect,
-                student: true
+                student: true,
+                hostel: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         })
         return res.status(200).json(student);
@@ -107,7 +117,7 @@ export const getSingleStudent = async (req: Request, res: Response) =>{
 
 export const createWarden = async (req: Request, res: Response) =>{
     try{
-        const parsed = createWardenInput.safeParse(req.body);
+        const parsed = createUserInput.safeParse(req.body);
         const hostelId = req.user?.hostelId;
         if(!parsed.success){
             return res.status(401).json({
@@ -134,7 +144,7 @@ export const createWarden = async (req: Request, res: Response) =>{
             }
         })
         return res.status(200).json({
-            msg: "Warden created successfully.."
+            msg: "User created successfully.."
         })
     }
     catch(e){
@@ -157,6 +167,11 @@ export const getwardens = async (req: Request, res: Response) =>{
             },
             select: {
                 ...safeUserSelect,
+                hostel: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         })
         return res.status(200).json(allWardens);
@@ -180,7 +195,12 @@ export const getSingleWarden = async (req: Request, res: Response) =>{
                 hostelId: hostelId
             },
             select: {
-                ...safeUserSelect
+                ...safeUserSelect,
+                hostel: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         })
         return res.status(200).json(singleWarden);
@@ -280,7 +300,7 @@ export const updateStudent = async (req: Request, res: Response) =>{
             }
         })
         if(!existStudent){
-            return res.status(400).json({
+            return res.status(404).json({
                 msg: "Student not found!!"
             })
         }
@@ -306,6 +326,63 @@ export const updateStudent = async (req: Request, res: Response) =>{
     }
 }
 
-export const updateWarden = (req: Request, res: Response) =>{
-    
+export const updateUser = async (req: Request, res: Response) =>{
+    try{
+        const id = req.params.id;
+        const hostelId = req.user?.hostelId;
+        const parsed = updateUserInput.safeParse(req.body);
+        if(!parsed.success){
+            return res.status(401).json({
+                msg: "Incorrect inputs!!"
+            })
+        }
+        const existWarden = await prisma.user.findFirst({
+            where: {id: id, hostelId: hostelId}
+        })
+        if(!existWarden){
+            return res.status(404).json({
+                msg: "user doesn't exists!!"
+            })
+        }
+        await prisma.user.update({
+            where: {id: id},
+            data: {
+                name: parsed.data.name,
+                mobNo: parsed.data.mobNo,
+                isActive: parsed.data.isActive
+            }
+        })
+        return res.status(200).json({
+            msg: "User updated successfully.."
+        })
+    }
+    catch(e){
+        console.log(e);
+        return res.status(500).json({
+            msg: "Internal server error!!"
+        })
+    }
 }
+
+export const getAdmins = async (req: Request, res: Response) =>{
+    try{
+        const allAdmin = await prisma.user.findMany({
+            where: {role: "ADMIN"},
+            select: {
+                ...safeUserSelect,
+                hostel:{
+                    select:{
+                        name: true
+                    }
+                }
+            }
+        })
+        return res.status(200).json(allAdmin);
+    }catch(e){
+        console.log(e);
+        return res.status(500).json({
+            msg: "Internal server error!!"
+        })
+    }
+}
+
