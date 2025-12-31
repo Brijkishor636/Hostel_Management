@@ -3,6 +3,7 @@ import { verifyToken } from "../middlewares/authMiddleware";
 import { authorizeRole } from "../middlewares/roleMiddleware";
 import { createStudent, createWarden, deleteStudent, deleteWarden, getAdmins, getSingleStudent, getSingleWarden, getStudents, getwardens, updateStudent, updateUser} from "../controller/adminController";
 import { getSelfDetails, updateSelfProfile } from "../controller/userController";
+import { allocateRoom } from "../controller/roomController";
 
 const adminRouter = express.Router();
 
@@ -34,6 +35,8 @@ adminRouter.get("/admins", (req: Request, res: Response) => getAdmins(req, res))
 adminRouter.get("/me", (req: Request, res: Response) => getSelfDetails(req, res));
 
 adminRouter.put("/update-selfprofile", (req: Request, res: Response) => updateSelfProfile(req, res));
+
+adminRouter.post("/rooms/allocate", (req: Request, res: Response) => allocateRoom(req, res));
 
 
 export default adminRouter;
