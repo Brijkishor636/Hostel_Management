@@ -53,9 +53,17 @@ const createStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         regNo: parsed.data.regNo,
                         hostel: {
                             connect: { id: hostelId }
+                        },
+                        room: {
+                            create: {
+                                number: parsed.data.roomNo,
+                                hostel: {
+                                    connect: { id: hostelId }
+                                }
+                            }
                         }
                     }
-                }
+                },
             }
         });
         return res.status(201).json({
@@ -79,7 +87,18 @@ const getStudents = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 role: "STUDENT",
                 hostelId: hostelId,
                 isActive: true
-            }, select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { student: true, hostel: {
+            },
+            select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { student: {
+                    select: {
+                        regNo: true,
+                        room: {
+                            select: {
+                                id: true,
+                                number: true,
+                            }
+                        }
+                    }
+                }, hostel: {
                     select: {
                         name: true
                     }
@@ -104,7 +123,18 @@ const getSingleStudent = (req, res) => __awaiter(void 0, void 0, void 0, functio
             where: {
                 id: id,
                 hostelId
-            }, select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { student: true, hostel: {
+            },
+            select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { student: {
+                    select: {
+                        regNo: true,
+                        room: {
+                            select: {
+                                id: true,
+                                number: true
+                            }
+                        }
+                    }
+                }, hostel: {
                     select: {
                         name: true
                     }
@@ -288,43 +318,52 @@ const updateStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     var _a;
     try {
         const id = req.params.id;
-        const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
+        const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
         const parsed = studentInput_1.updateStudentSchema.safeParse(req.body);
         if (!parsed.success) {
-            return res.status(401).json({
+            return res.status(400).json({
                 msg: "Incorrect inputs!!"
             });
         }
-        const existStudent = yield prisma.user.findUnique({
+        const existingStudent = yield prisma.user.findFirst({
             where: {
-                id: id,
+                id,
                 hostelId,
                 role: "STUDENT"
             }
         });
-        if (!existStudent) {
+        if (!existingStudent) {
             return res.status(404).json({
                 msg: "Student not found!!"
             });
         }
         yield prisma.user.update({
-            where: { id: id },
+            where: { id },
             data: {
                 name: parsed.data.name,
                 mobNo: parsed.data.mobNo,
                 isActive: parsed.data.isActive,
                 student: {
-                    update: {
-                        regNo: parsed.data.regNo
+                    upsert: {
+                        update: {
+                            regNo: parsed.data.regNo
+                        },
+                        create: {
+                            regNo: parsed.data.regNo,
+                            hostelId
+                        }
                     }
                 }
             }
         });
+        return res.status(200).json({
+            msg: "Student updated successfully"
+        });
     }
     catch (e) {
-        console.log(e);
+        console.error(e);
         return res.status(500).json({
-            msg: "Internal server error!!"
+            msg: "Internal server error"
         });
     }
 });

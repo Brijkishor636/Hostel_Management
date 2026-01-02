@@ -40,9 +40,17 @@ export const createStudent = async (req: Request, res: Response) =>{
                         regNo: parsed.data.regNo,
                     hostel: {
                       connect: { id: hostelId }
+                    },
+                    room: {
+                        create: {
+                            number: parsed.data.roomNo!,
+                            hostel:{
+                                connect: {id: hostelId}
+                            }
+                        }
                     }
                   }
-                }
+                },
             }
         })
         return res.status(201).json({
@@ -66,9 +74,20 @@ export const getStudents = async (req: Request, res: Response) =>{
                 role: "STUDENT",
                 hostelId: hostelId,
                 isActive: true
-            },select:{
+            },
+            select:{
                 ...safeUserSelect,
-                student: true,
+                student: {
+                    select: {
+                        regNo: true,
+                        room: {
+                            select: {
+                                id: true,
+                                number: true,
+                            }
+                        }
+                    }
+                },
                 hostel: {
                     select: {
                         name: true
@@ -95,9 +114,20 @@ export const getSingleStudent = async (req: Request, res: Response) =>{
             where: {
                 id: id,
                 hostelId
-            },select: {
+            },
+            select: {
                 ...safeUserSelect,
-                student: true,
+                student: {
+                    select: {
+                        regNo: true,
+                        room: {
+                            select: {
+                                id: true,
+                                number: true
+                            }
+                        }
+                    }
+                },
                 hostel: {
                     select: {
                         name: true
@@ -282,49 +312,60 @@ export const deleteWarden = async (req: Request, res: Response) =>{
     }
 }
 
-export const updateStudent = async (req: Request, res: Response) =>{
-    try{
-        const id = req.params.id;
-        const hostelId = req.user?.id;
-        const parsed = updateStudentSchema.safeParse(req.body);
-        if(!parsed.success){
-            return res.status(401).json({
-                msg: "Incorrect inputs!!"
-            })
-        }
-        const existStudent = await prisma.user.findUnique({
-            where: {
-                id: id,
-                hostelId,
-                role: "STUDENT"
-            }
-        })
-        if(!existStudent){
-            return res.status(404).json({
-                msg: "Student not found!!"
-            })
-        }
-        await prisma.user.update({
-            where: {id: id},
-            data :{
-                name: parsed.data.name,
-                mobNo: parsed.data.mobNo,
-                isActive: parsed.data.isActive,
-                student: {
-                    update:{
-                        regNo: parsed.data.regNo
-                    }
-                }
-            }
-        })
+export const updateStudent = async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const hostelId = req.user?.hostelId;
+    const parsed = updateStudentSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        msg: "Incorrect inputs!!"
+      });
     }
-    catch(e){
-        console.log(e);
-        return res.status(500).json({
-            msg: "Internal server error!!"
-        })
+    const existingStudent = await prisma.user.findFirst({
+      where: {
+        id,
+        hostelId,
+        role: "STUDENT"
+      }
+    });
+
+    if (!existingStudent) {
+      return res.status(404).json({
+        msg: "Student not found!!"
+      });
     }
-}
+
+    await prisma.user.update({
+      where: { id },
+      data: {
+        name: parsed.data.name,
+        mobNo: parsed.data.mobNo,
+        isActive: parsed.data.isActive,
+        student: {
+          upsert: {
+            update: {
+              regNo: parsed.data.regNo!
+            },
+            create: {
+              regNo: parsed.data.regNo!,
+              hostelId
+            }
+          }
+        }
+      }
+    });
+    return res.status(200).json({
+      msg: "Student updated successfully"
+    });
+  } catch (e) {
+    console.error(e);
+    return res.status(500).json({
+      msg: "Internal server error"
+    });
+  }
+};
+
 
 export const updateUser = async (req: Request, res: Response) =>{
     try{

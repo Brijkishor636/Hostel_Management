@@ -3,7 +3,7 @@ import { verifyToken } from "../middlewares/authMiddleware";
 import { authorizeRole } from "../middlewares/roleMiddleware";
 import { createStudent, createWarden, deleteStudent, deleteWarden, getAdmins, getSingleStudent, getSingleWarden, getStudents, getwardens, updateStudent, updateUser} from "../controller/adminController";
 import { getSelfDetails, updateSelfProfile } from "../controller/userController";
-import { allocateRoom } from "../controller/roomController";
+import { allocateRoom, createRooms, deleteRoom, getAllRooms, getSingleRoom, updateRoom } from "../controller/roomController";
 
 const adminRouter = express.Router();
 
@@ -38,5 +38,14 @@ adminRouter.put("/update-selfprofile", (req: Request, res: Response) => updateSe
 
 adminRouter.post("/rooms/allocate", (req: Request, res: Response) => allocateRoom(req, res));
 
+adminRouter.post("/rooms/create", (req: Request, res: Response) => createRooms(req, res));
+
+adminRouter.get("/rooms", (req: Request, res: Response) => getAllRooms(req, res));
+
+adminRouter.get("/rooms/:roomNo", (req: Request, res: Response) => getSingleRoom(req, res));
+
+adminRouter.put("/rooms/update/:roomNum", (req: Request, res: Response) => updateRoom(req, res));
+
+adminRouter.delete("/rooms:/roomNo", (req: Request, res: Response) => deleteRoom(req, res));
 
 export default adminRouter;

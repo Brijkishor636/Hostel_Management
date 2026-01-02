@@ -10,11 +10,13 @@ exports.createStudentInput = zod_1.default.object({
     email: zod_1.default.string().email(),
     password: zod_1.default.string().min(4),
     mobNo: zod_1.default.string(),
-    regNo: zod_1.default.string()
+    regNo: zod_1.default.string(),
+    roomNo: zod_1.default.string().min(3).optional()
 });
 exports.updateStudentSchema = zod_1.default.object({
     name: zod_1.default.string().optional(),
     mobNo: zod_1.default.string().optional(),
     regNo: zod_1.default.string().optional(),
-    isActive: zod_1.default.boolean().optional()
+    isActive: zod_1.default.boolean().optional(),
+    roomNo: zod_1.default.string().min(3).optional()
 });

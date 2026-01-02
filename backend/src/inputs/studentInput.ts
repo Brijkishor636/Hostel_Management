@@ -5,14 +5,16 @@ export const createStudentInput = z.object({
     email: z.string().email(),
     password: z.string().min(4),
     mobNo: z.string(),
-    regNo: z.string()
+    regNo: z.string(),
+    roomNo: z.string().min(3).optional()
 })
 
 export const updateStudentSchema = z.object({
     name: z.string().optional(),
     mobNo: z.string().optional(),
     regNo: z.string().optional(),
-    isActive: z.boolean().optional()
+    isActive: z.boolean().optional(),
+    roomNo: z.string().min(3).optional()
 });
 
 
