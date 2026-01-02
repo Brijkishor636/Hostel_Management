@@ -46,6 +46,6 @@ adminRouter.get("/rooms/:roomNo", (req: Request, res: Response) => getSingleRoom
 
 adminRouter.put("/rooms/update/:roomNum", (req: Request, res: Response) => updateRoom(req, res));
 
-adminRouter.delete("/rooms:/roomNo", (req: Request, res: Response) => deleteRoom(req, res));
+adminRouter.delete("/rooms/:roomNo", (req: Request, res: Response) => deleteRoom(req, res));
 
 export default adminRouter;

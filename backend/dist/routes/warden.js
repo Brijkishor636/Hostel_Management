@@ -8,6 +8,7 @@ const adminController_1 = require("../controller/adminController");
 const authMiddleware_1 = require("../middlewares/authMiddleware");
 const roleMiddleware_1 = require("../middlewares/roleMiddleware");
 const userController_1 = require("../controller/userController");
+const roomController_1 = require("../controller/roomController");
 const wardenRouter = express_1.default.Router();
 wardenRouter.use(authMiddleware_1.verifyToken);
 wardenRouter.use((0, roleMiddleware_1.authorizeRole)("WARDEN"));
@@ -17,4 +18,10 @@ wardenRouter.get("/student/:id", (req, res) => (0, adminController_1.getSingleSt
 wardenRouter.put("/student/:id", (req, res) => (0, adminController_1.updateStudent)(req, res));
 wardenRouter.put("/update-selfprofile", (req, res) => (0, userController_1.updateSelfProfile)(req, res));
 wardenRouter.get("/me", (req, res) => (0, userController_1.getSelfDetails)(req, res));
+wardenRouter.post("/rooms/allocate", (req, res) => (0, roomController_1.allocateRoom)(req, res));
+wardenRouter.post("/rooms/create", (req, res) => (0, roomController_1.createRooms)(req, res));
+wardenRouter.get("/rooms", (req, res) => (0, roomController_1.getAllRooms)(req, res));
+wardenRouter.get("/rooms/:roomNo", (req, res) => (0, roomController_1.getSingleRoom)(req, res));
+wardenRouter.put("/rooms/update/:roomNum", (req, res) => (0, roomController_1.updateRoom)(req, res));
+wardenRouter.delete("/rooms/:roomNo", (req, res) => (0, roomController_1.deleteRoom)(req, res));
 exports.default = wardenRouter;

@@ -79,6 +79,7 @@ export const getStudents = async (req: Request, res: Response) =>{
                 ...safeUserSelect,
                 student: {
                     select: {
+                        id: true,
                         regNo: true,
                         room: {
                             select: {
@@ -119,6 +120,7 @@ export const getSingleStudent = async (req: Request, res: Response) =>{
                 ...safeUserSelect,
                 student: {
                     select: {
+                        id: true,
                         regNo: true,
                         room: {
                             select: {

@@ -30,5 +30,5 @@ adminRouter.post("/rooms/create", (req, res) => (0, roomController_1.createRooms
 adminRouter.get("/rooms", (req, res) => (0, roomController_1.getAllRooms)(req, res));
 adminRouter.get("/rooms/:roomNo", (req, res) => (0, roomController_1.getSingleRoom)(req, res));
 adminRouter.put("/rooms/update/:roomNum", (req, res) => (0, roomController_1.updateRoom)(req, res));
-adminRouter.delete("/rooms:/roomNo", (req, res) => (0, roomController_1.deleteRoom)(req, res));
+adminRouter.delete("/rooms/:roomNo", (req, res) => (0, roomController_1.deleteRoom)(req, res));
 exports.default = adminRouter;

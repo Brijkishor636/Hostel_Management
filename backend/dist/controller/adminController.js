@@ -90,6 +90,7 @@ const getStudents = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             },
             select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { student: {
                     select: {
+                        id: true,
                         regNo: true,
                         room: {
                             select: {
@@ -126,6 +127,7 @@ const getSingleStudent = (req, res) => __awaiter(void 0, void 0, void 0, functio
             },
             select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { student: {
                     select: {
+                        id: true,
                         regNo: true,
                         room: {
                             select: {

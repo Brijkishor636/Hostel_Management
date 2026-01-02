@@ -3,7 +3,7 @@ export const safeRoomSelector = {
     id: true,
     number: true,
     capacity: true,
-    occupacy: true,
+    occupancy: true,
     status: true,
     hostelId: true
 }

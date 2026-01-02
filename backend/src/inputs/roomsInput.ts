@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const allocateRoomsInput = z.object({
-    studnetId: z.string().uuid(),
+    studnetId: z.string(),
     roomNo: z.string().min(3)
 })
 

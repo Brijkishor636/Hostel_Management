@@ -14,12 +14,17 @@ export const allocateRoom = async (req: Request, res: Response) =>{
             })
         }
         const hostelId = req.user?.hostelId;
-        const student = await prisma.user.findFirst({
+        const student = await prisma.student.findFirst({
             where: { id: parsed.data.studnetId }
         })
         if(!student || student.hostelId != hostelId){
             return res.status(404).json({
                 msg: "Student not found"
+            })
+        }
+        if(student.roomId){
+            return res.status(400).json({
+                msg: "Room already allocated, for student"
             })
         }
         const room = await prisma.room.findFirst({
@@ -36,7 +41,9 @@ export const allocateRoom = async (req: Request, res: Response) =>{
         await prisma.$transaction([
           prisma.student.update({
             where: { id: parsed.data.studnetId},
-            data: { roomId: room.id }
+            data: {
+                roomId: room.id
+            }
           }),
           prisma.room.update({
             where: { id: room.id },
@@ -53,6 +60,7 @@ export const allocateRoom = async (req: Request, res: Response) =>{
     })
     }
     catch(e){
+        console.log(e);
         return res.status(500).json({
             msg: "Internal server error!!"
         })
@@ -96,6 +104,7 @@ export const getAllRooms = async (req: Request, res: Response) =>{
                 ...safeRoomSelector,
                 students: {
                     select: {
+                        id: true,
                         regNo: true
                     }
                 }
@@ -104,6 +113,7 @@ export const getAllRooms = async (req: Request, res: Response) =>{
         return res.status(200).json(allRooms)
     }
     catch(e){
+        console.log(e);
         return res.status(500).json({
             msg: "Internal server error!!"
         })
@@ -123,6 +133,7 @@ export const getSingleRoom = async (req: Request, res: Response) =>{
                 ...safeRoomSelector,
                 students: {
                     select: {
+                        id: true,
                         regNo: true,
                     }
                 }
@@ -131,6 +142,7 @@ export const getSingleRoom = async (req: Request, res: Response) =>{
         return res.status(200).json(singleRoom);
     }
     catch(e){
+        console.log(e);
         return res.status(500).json({
             msg: "Internal server error!!"
         })
@@ -157,18 +169,20 @@ export const updateRoom = async (req: Request, res: Response) =>{
         }
         await prisma.room.update({
             where: {
-                hostelId_number: {
-                    hostelId,
-                    number: roomNum
-                }
+                id: existRoom.id,
+                hostelId
             },
-            data: parsed.data
+            data: {
+                number: parsed.data.roomNo,
+                capacity: parsed.data.capacity
+            }
         });
         return res.status(200).json({
             msg: "Room updated successfully"
         });
     }
     catch(e){
+        console.log(e);
         return res.status(500).json({
             msg: "Internal server error!!"
         })
@@ -179,22 +193,28 @@ export const deleteRoom = async (req: Request, res: Response) =>{
     try{
         const hostelId = req.user?.hostelId;
         const roomNo = req.params.roomNo;
-        const existStudent = await prisma.room.findFirst({
+        const existRoom = await prisma.room.findFirst({
             where: {number: roomNo, hostelId}
         })
-        if(existStudent?.occupancy != 0){
+        if(!existRoom){
+            return res.status(400).json({
+                msg: "Room doesn't exists!!"
+            })
+        }
+        if(existRoom?.occupancy != 0){
             return res.status(400).json({
                 msg: "Room can't be deleted, student exists"
             })
         }
         await prisma.room.delete({
-            where: {id: existStudent.id}
+            where: {id: existRoom.id}
         })
         return res.status(200).json({
             msg: "Room deleted successfully.."
         })
     }
     catch(e){
+        console.log(e);
         return res.status(500).json({
             msg: "Internal server error!!"
         })
