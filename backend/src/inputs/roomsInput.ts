@@ -19,7 +19,6 @@ export const updateRoomInput = z.object({
 });
 
 
-
 export type createRoomInput = z.infer<typeof createRoomsInput>
 export type allocateRoomsInput = z.infer<typeof allocateRoomsInput>
 export type updateRoomInput = z.infer<typeof updateRoomInput>
