@@ -33,9 +33,9 @@ export default function Navbar() {
         </div>
 
         <div className="hidden md:flex gap-4">
-          <button className="px-5 py-2 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold shadow-md hover:scale-105 transition">
+          <Link href={"/login"} className="px-5 py-2 rounded-2xl bg-gradient-to-r from-purple-600 to-pink-500 text-white font-semibold shadow-md hover:scale-105 transition">
             Login
-          </button>
+          </Link>
         </div>
 
         <button

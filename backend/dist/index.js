@@ -12,11 +12,17 @@ const student_1 = __importDefault(require("./routes/student"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)());
+// app.use(
+//   cors({
+//     origin: "http://localhost:3000",
+//     credentials: true,
+//   })
+// );
 app.use("/api/v1/user", user_1.default);
 app.use("/api/v1/admin", admin_1.default);
 app.use("/api/v1/warden", warden_1.default);
 app.use("/api/v1/student", student_1.default);
-app.listen(3000, () => {
-    console.log("Server running on port 3000");
+app.listen(3001, () => {
+    console.log("Server running on port 3001");
 });
 exports.default = app;

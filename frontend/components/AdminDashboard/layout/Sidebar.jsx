@@ -2,11 +2,11 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NAV_ITEMS } from "@/components/constants";
+import { NAV_ITEMS } from "../../constants";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function Sidebar({ mobileOpen, setMobileOpen }) {
+export default function Sidebar({ mobileOpen, setMobileOpen, baseRoute }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
@@ -27,12 +27,16 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
 
       <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
         {NAV_ITEMS.map((item) => {
+
           const href =
-            item.id === "dashboard" ? "/admin" : `/admin/${item.id}`;
+            item.id === "dashboard"
+              ? baseRoute
+              : `${baseRoute}/${item.id}`;
 
           let isActive = false;
+
           if (item.id === "dashboard") {
-            isActive = pathname === "/admin";
+            isActive = pathname === baseRoute;
           } else {
             isActive = pathname.startsWith(href);
           }

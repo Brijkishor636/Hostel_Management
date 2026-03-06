@@ -1,7 +1,7 @@
 "use client";
 import { Menu, Bell, User, Search } from "lucide-react";
 
-export default function Navbar({ setMobileOpen }) {
+export default function Navbar({ setMobileOpen, title }) {
   return (
     <header
       className="
@@ -26,7 +26,7 @@ export default function Navbar({ setMobileOpen }) {
         </button>
 
         <h1 className="hidden sm:block text-lg font-semibold bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent">
-          Admin Panel
+          {title}
         </h1>
       </div>
 

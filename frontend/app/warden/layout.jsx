@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import Sidebar from "../../components/AdminDashboard/layout/Sidebar";
 import Navbar from "../../components/AdminDashboard/layout/Navbar";
 
-export default function AdminLayout({ children }) {
+export default function WardenLayout({ children }) {
  const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
@@ -13,12 +13,12 @@ export default function AdminLayout({ children }) {
       <Sidebar
         mobileOpen={mobileOpen}
         setMobileOpen={setMobileOpen}
-        baseRoute={"/admin"}
+        baseRoute={"/warden"}
       />
 
       <main className="flex flex-1 flex-col">
 
-        <Navbar setMobileOpen={setMobileOpen} title={"Admin Panel"}/>
+        <Navbar setMobileOpen={setMobileOpen} title={"Warden Panel"} />
 
         <div className="flex-1 w-full">
           <motion.div

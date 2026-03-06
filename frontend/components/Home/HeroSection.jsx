@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import heroImg from "../../public/hero-section-showcase-3.png"
+import heroImg from "../../assets/hostel_img.jpg"
 
 export default function HeroSection() {
   return (
@@ -50,7 +50,7 @@ export default function HeroSection() {
             <Image
               src={heroImg}   
               alt="Hero Image"
-              width={450}
+              width={500}
               height={500}
               className="rounded-3xl object-cover"
             />

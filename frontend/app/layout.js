@@ -1,8 +1,8 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navbar from "@/components/Navbar";
+import Navbar from "../components/Navbar";
 import { Poppins } from "next/font/google";
-import Footer from "@/components/Footer";
+import Footer from "../components/Footer";
 
 const poppins = Poppins({
   subsets: ["latin"],
