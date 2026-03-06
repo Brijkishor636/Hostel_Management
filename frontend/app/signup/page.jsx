@@ -2,10 +2,14 @@
 
 import { useState } from "react";
 
-export default function LoginPage() {
+export default function SignupPage() {
 
   const [formData, setFormData] = useState({
+    roomNo: "",
+    name: "",
     email: "",
+    mobile: "",
+    regNo: "",
     password: "",
   });
 
@@ -26,16 +30,50 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md bg-white shadow-xl rounded-xl p-8">
 
-        <h2 className="text-2xl font-bold text-center mb-6">
-          Log In
-        </h2>
+        <h2 className="text-2xl font-bold text-center mb-6">Sign Up</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+
+          <input
+            type="text"
+            name="roomNo"
+            placeholder="Room No"
+            onChange={handleChange}
+            className="w-full border p-3 rounded-md focus:outline-none focus:border-blue-500"
+            required
+          />
+
+          <input
+            type="text"
+            name="name"
+            placeholder="Name"
+            onChange={handleChange}
+            className="w-full border p-3 rounded-md focus:outline-none focus:border-blue-500"
+            required
+          />
 
           <input
             type="email"
             name="email"
             placeholder="Email"
+            onChange={handleChange}
+            className="w-full border p-3 rounded-md focus:outline-none focus:border-blue-500"
+            required
+          />
+
+          <input
+            type="text"
+            name="mobile"
+            placeholder="Mobile No"
+            onChange={handleChange}
+            className="w-full border p-3 rounded-md focus:outline-none focus:border-blue-500"
+            required
+          />
+
+          <input
+            type="text"
+            name="regNo"
+            placeholder="Registration No"
             onChange={handleChange}
             className="w-full border p-3 rounded-md focus:outline-none focus:border-blue-500"
             required
@@ -54,15 +92,15 @@ export default function LoginPage() {
             type="submit"
             className="w-full bg-blue-600 text-white py-3 rounded-md hover:bg-blue-700 transition"
           >
-            Log In
+            Sign Up
           </button>
 
         </form>
 
         <p className="text-center text-sm mt-4">
-          Don't have an account?
-          <a href="/signup" className="text-blue-600 ml-1 hover:underline">
-            Sign Up
+          Already have an account?
+          <a href="/login" className="text-blue-600 ml-1 hover:underline">
+            Log In
           </a>
         </p>
 
@@ -73,7 +111,7 @@ export default function LoginPage() {
         </div>
 
         <button className="w-full border py-3 rounded-md hover:bg-gray-50">
-          Sign in with Google
+          Sign up with Google
         </button>
 
       </div>
