@@ -4,18 +4,19 @@ import userRouter from "./routes/user";
 import adminRouter from "./routes/admin";
 import wardenRouter from "./routes/warden";
 import studentRouter from "./routes/student";
+import cors from "cors"
 
 const app = express();
 
 app.use(express.json());
 app.use(cookieParser());
 
-// app.use(
-//   cors({
-//     origin: "http://localhost:3000",
-//     credentials: true,
-//   })
-// );
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  })
+);
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/admin", adminRouter);

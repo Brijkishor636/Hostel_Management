@@ -14,7 +14,6 @@ export default function StDashboard()
 
         <Navbar />
 
-        {/* Stats Section */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <StatCard title="Room Number" value="A-101" />
           <StatCard title="Monthly Rent" value="₹4,000" />
