@@ -6,6 +6,7 @@ export default function Button({
   variant = "primary",
   size = "md",
   className = "",
+  onClick,
   ...props
 }) {
   const variants = {
@@ -26,7 +27,7 @@ export default function Button({
 
   return (
     <motion.button
-      whileTap={{ scale: 0.98 }}
+      whileTap={{ scale: 0.98 }} onClick={onClick}
       className={`rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
         variants[variant]
       } ${sizes[size]} ${className}`}

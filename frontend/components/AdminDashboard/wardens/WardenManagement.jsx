@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import Card from "../ui/Cards";
 import Badge from "../ui/Badge";
 import Button from "../ui/Button";
@@ -8,55 +8,64 @@ import {
   Filter,
   MoreVertical,
   Plus,
-  UserPlus,
+  ShieldCheck,
   X as CloseIcon,
   Download,
 } from "lucide-react";
-import { MOCK_STUDENTS } from "../../constants";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-const StudentManagement = () => {
+const MOCK_WARDENS = [
+  {
+    id: "W1",
+    name: "Rahul Sharma",
+    email: "rahul@hostel.com",
+    phone: "9876543210",
+    assignedBlock: "Block A",
+    status: "Active",
+  },
+  {
+    id: "W2",
+    name: "Amit Kumar",
+    email: "amit@hostel.com",
+    phone: "9123456780",
+    assignedBlock: "Block B",
+    status: "Inactive",
+  },
+];
+
+const WardenManagement = () => {
   const [search, setSearch] = useState("");
   const router = useRouter();
-  const pathname = usePathname();
 
-  const filteredStudents = MOCK_STUDENTS.filter(
-    (s) =>
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.roomNumber.toLowerCase().includes(search.toLowerCase())
+  const filteredWardens = MOCK_WARDENS.filter(
+    (w) =>
+      w.name.toLowerCase().includes(search.toLowerCase()) ||
+      w.assignedBlock.toLowerCase().includes(search.toLowerCase())
   );
 
   const clearSearch = () => setSearch("");
 
-  const getStatusColor = (status) => {
-    if (status === "Paid") return "bg-emerald-500/20 text-emerald-400";
-    if (status === "Pending") return "bg-yellow-500/20 text-yellow-400";
-    return "bg-red-500/20 text-red-400";
-  };
-
-  const baseRoute = pathname.startsWith("/warden") ? "/warden" : "/admin";
-
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e1b4b] text-white p-4 space-y-10">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e1b4b] text-white p-6 space-y-10">
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-xl sm:text-3xl font-bold flex items-center gap-3">
-            <UserPlus className="text-indigo-400 w-6 h-6 sm:w-8 sm:h-8" />
-            Student Directory
+            <ShieldCheck className="text-indigo-400 w-6 h-6 sm:w-8 sm:h-8" />
+            Warden Directory
           </h2>
           <p className="text-gray-400 text-sm mt-1">
-            Manage and monitor all student residents and their status.
+            Manage wardens, their assigned blocks, and availability.
           </p>
         </div>
 
         <Button
-          onClick={() => router.push(`${baseRoute}/students/create`)}
+          onClick={() => router.push("/admin/wardens/create")}
           size="lg"
           className="shadow-indigo-500/20 cursor-pointer"
         >
-          <Plus size={20} /> Add New Student
+          <Plus size={20} /> Add New Warden
         </Button>
       </div>
 
@@ -64,14 +73,11 @@ const StudentManagement = () => {
         <div className="flex flex-col lg:flex-row items-center gap-4 w-full bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-2">
 
           <div className="relative flex-1 w-full group">
-            <Search
-              className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-gray-500"
-              size={16}
-            />
+            <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
 
             <input
               type="text"
-              placeholder="Search students..."
+              placeholder="Search wardens..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-transparent border border-white/10 rounded-xl py-2 md:py-3.5 pl-10 md:pl-12 pr-10 text-sm md:text-base focus:outline-none focus:ring-1 focus:ring-indigo-500/40 placeholder:text-gray-500"
@@ -114,31 +120,25 @@ const StudentManagement = () => {
           <table className="w-full text-left text-sm">
             <thead className="bg-white/5 text-gray-400 text-[11px]">
               <tr>
-                <th className="px-8 py-5">Resident Info</th>
-                <th className="px-6 py-5">Room</th>
-                <th className="px-6 py-5">Email Address</th>
-                <th className="px-6 py-5">Payment Status</th>
+                <th className="px-8 py-5">Warden Info</th>
+                <th className="px-6 py-5">Block</th>
+                <th className="px-6 py-5">Email</th>
+                <th className="px-6 py-5">Phone</th>
+                <th className="px-6 py-5">Status</th>
                 <th className="px-8 py-5 text-right">Action</th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-white/5">
-              {filteredStudents.map((student) => (
-                <tr key={student.id}>
-                  <td className="px-8 py-5">{student.name}</td>
-                  <td className="px-6 py-5">{student.roomNumber}</td>
-                  <td className="px-6 py-5">{student.email}</td>
+              {filteredWardens.map((warden) => (
+                <tr key={warden.id}>
+                  <td className="px-8 py-5">{warden.name}</td>
+                  <td className="px-6 py-5">{warden.assignedBlock}</td>
+                  <td className="px-6 py-5">{warden.email}</td>
+                  <td className="px-6 py-5">{warden.phone}</td>
                   <td className="px-6 py-5">
-                    <Badge
-                      variant={
-                        student.paymentStatus === "Paid"
-                          ? "success"
-                          : student.paymentStatus === "Pending"
-                          ? "warning"
-                          : "error"
-                      }
-                    >
-                      {student.paymentStatus}
+                    <Badge variant={warden.status === "Active" ? "success" : "error"}>
+                      {warden.status}
                     </Badge>
                   </td>
                   <td className="px-8 py-5 text-right">
@@ -151,38 +151,33 @@ const StudentManagement = () => {
         </div>
 
         <div className="md:hidden space-y-3 p-3">
-          {filteredStudents.map((student) => (
-            <div key={student.id} className="p-3 rounded-xl bg-white/5 border border-white/10">
+          {filteredWardens.map((warden) => (
+            <div key={warden.id} className="p-3 rounded-xl bg-white/5 border border-white/10">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                  {student.name.charAt(0)}
+                  {warden.name.charAt(0)}
                 </div>
                 <div>
-                  <p className="font-semibold">{student.name}</p>
-                  <p className="text-xs text-gray-400">#{student.id}</p>
+                  <p className="font-semibold">{warden.name}</p>
+                  <p className="text-xs text-gray-400">#{warden.id}</p>
                 </div>
               </div>
 
               <div className="mt-3 text-sm space-y-2">
-                <p>Room: {student.roomNumber}</p>
-                <p className="truncate">Email: {student.email}</p>
-
-                <span
-                  className={`px-2 py-1 rounded-lg text-xs ${getStatusColor(
-                    student.paymentStatus
-                  )}`}
-                >
-                  {student.paymentStatus}
-                </span>
+                <p>Block: {warden.assignedBlock}</p>
+                <p className="truncate">Email: {warden.email}</p>
+                <p>Phone: {warden.phone}</p>
+                <Badge variant={warden.status === "Active" ? "success" : "error"}>
+                  {warden.status}
+                </Badge>
               </div>
             </div>
           ))}
         </div>
 
         <div className="px-4 md:px-8 py-4 md:py-5 border-t border-white/10 flex flex-col sm:flex-row lg:flex-row items-center lg:items-center justify-between gap-4 text-xs text-gray-500 bg-white/5">
-
           <p className="w-full text-left sm:w-auto lg:w-auto lg:flex lg:items-center lg:h-full">
-            {filteredStudents.length} / {MOCK_STUDENTS.length}
+            {filteredWardens.length} / {MOCK_WARDENS.length}
           </p>
 
           <div className="flex gap-2 w-full sm:w-auto lg:w-auto lg:items-center">
@@ -193,11 +188,10 @@ const StudentManagement = () => {
               Next
             </button>
           </div>
-
         </div>
       </Card>
     </div>
   );
 };
 
-export default StudentManagement;
+export default WardenManagement;

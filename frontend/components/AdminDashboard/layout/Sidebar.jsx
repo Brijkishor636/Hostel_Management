@@ -10,6 +10,13 @@ export default function Sidebar({ mobileOpen, setMobileOpen, baseRoute }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
 
+  const isWardenRoute = pathname.startsWith("/warden");
+
+  const filteredNavItems = NAV_ITEMS.filter((item) => {
+    if (isWardenRoute && item.id === "wardens") return false;
+    return true;
+  });
+
   const sidebarContent = (
     <>
       <div className="text-right px-4 py-4 border-b border-white/10">
@@ -26,8 +33,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen, baseRoute }) {
       </div>
 
       <nav className="flex-1 px-3 py-6 space-y-2 overflow-y-auto">
-        {NAV_ITEMS.map((item) => {
-
+        {filteredNavItems.map((item) => {
           const href =
             item.id === "dashboard"
               ? baseRoute
@@ -47,7 +53,9 @@ export default function Sidebar({ mobileOpen, setMobileOpen, baseRoute }) {
               href={href}
               onClick={() => setMobileOpen(false)}
               className={`
-                flex items-center gap-3 px-3 py-3 rounded-xl
+                flex items-center ${
+                  collapsed ? "justify-center px-0" : "gap-3 px-3"
+                } py-3 rounded-xl
                 transition-all duration-300 group
                 ${
                   isActive
@@ -60,11 +68,14 @@ export default function Sidebar({ mobileOpen, setMobileOpen, baseRoute }) {
                 {item.icon}
               </span>
 
-              {!collapsed && (
-                <span className="font-medium whitespace-nowrap">
-                  {item.label}
-                </span>
-              )}
+              <span
+                className={`
+                  font-medium whitespace-nowrap transition-all duration-300
+                  ${collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"}
+                `}
+              >
+                {item.label}
+              </span>
             </Link>
           );
         })}
@@ -106,7 +117,11 @@ export default function Sidebar({ mobileOpen, setMobileOpen, baseRoute }) {
               animate={{ x: 0 }}
               exit={{ x: -300 }}
               transition={{ type: "spring", stiffness: 260, damping: 25 }}
-              className="fixed inset-y-0 left-0 w-64 border-r border-white/10 z-50 flex flex-col backdrop-blur-md"
+              className={`
+                fixed inset-y-0 left-0 border-r border-white/10 z-50 flex flex-col backdrop-blur-md
+                transition-all duration-300
+                ${collapsed ? "w-20" : "w-64"}
+              `}
               style={{
                 background:
                   "linear-gradient(180deg, #020617 0%, #0f172a 40%, #1e1b4b 100%)",

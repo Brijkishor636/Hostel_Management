@@ -1,10 +1,11 @@
 
 import React from 'react';
-import { LayoutDashboard, Users, DoorOpen, CreditCard, MessageSquare, Bell } from 'lucide-react';
+import { LayoutDashboard, Users, DoorOpen, CreditCard, MessageSquare, Bell, User } from 'lucide-react';
 
 export const NAV_ITEMS = [
   { id: 'dashboard', label: 'Overview', icon: <LayoutDashboard size={20} /> },
   { id: 'students', label: 'Students', icon: <Users size={20} /> },
+  {id: 'wardens', label: 'Wardens', icon: <User size={20}/>},
   { id: 'rooms', label: 'Rooms', icon: <DoorOpen size={20} /> },
   { id: 'payments', label: 'Payments', icon: <CreditCard size={20} /> },
   { id: 'complaints', label: 'Complaints', icon: <MessageSquare size={20} /> },
@@ -43,4 +44,12 @@ export const MOCK_COMPLAINTS = [
 export const MOCK_NOTICES = [
   { id: '1', title: 'Summer Maintenance', content: 'Weekly maintenance will occur every Sunday from 10 AM to 2 PM.', date: '2024-05-01', expires: '2024-06-01', category: 'General' },
   { id: '2', title: 'Power Outage Warning', content: 'Scheduled power outage for grid repairs on June 5th.', date: '2024-05-20', expires: '2024-06-06', category: 'Urgent' },
+];
+
+export const MOCK_WARDENS = [
+  { id: '1', name: 'Alex Thompson', roomNumber: '101A', email: 'alex.t@example.com', status: 'Active', paymentStatus: 'Paid' },
+  { id: '2', name: 'Sarah Miller', roomNumber: '204B', email: 's.miller@example.com', status: 'Active', paymentStatus: 'Pending' },
+  { id: '3', name: 'James Wilson', roomNumber: '302A', email: 'j.wilson@example.com', status: 'Inactive', paymentStatus: 'Overdue' },
+  { id: '4', name: 'Elena Rodriguez', roomNumber: '101B', email: 'elena.r@example.com', status: 'Active', paymentStatus: 'Paid' },
+  { id: '5', name: 'Kevin Chen', roomNumber: '405C', email: 'k.chen@example.com', status: 'Active', paymentStatus: 'Paid' },
 ];
