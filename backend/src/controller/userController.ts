@@ -49,13 +49,50 @@ export const signin = async (req: Request, res: Response) => {
     return res.status(200).json({
       msg: "Login successful",
       role: user.role,
-      dashboard: getDashboardForRole(user.role)
+      dashboard: getDashboardForRole(user.role),
+      user
     });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ msg: "Internal server error" });
   }
 };
+
+
+export const currentUser = async(req: Request, res: Response) =>{
+  try{
+    const token = req.cookies.token;
+  if(!token){
+    return res.status(401).json({
+      msg: "no token, authorization denied"
+    })
+  }
+  const secretKey = process.env.JWT_SECRET as Secret;
+    if (!secretKey) {
+      return res.status(500).json({ msg: "JWT secret not configured" });
+    }
+  const data = jwt.verify(token, secretKey) as { userId: string };
+  const user = await prisma.user.findFirst({
+    where: {
+      id: data.userId
+    }
+  })
+  if (!user) {
+      return res.status(404).json({
+        msg: "User not found",
+      });
+    }
+    const { password, ...userWithoutPassword } = user;
+    return res.status(200).json({
+      user: userWithoutPassword,
+    });
+  }
+   catch (error) {
+    return res.status(401).json({
+      msg: "Invalid or expired token",
+    });
+  }
+}
 
 
 export const logout = (req: Request, res: Response) =>{

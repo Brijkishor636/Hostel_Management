@@ -3,6 +3,8 @@ import "./globals.css";
 import Navbar from "../components/Navbar";
 import { Poppins } from "next/font/google";
 import Footer from "../components/Footer";
+import { ToastContainer } from "react-toastify";
+import UserProvider from "../context/UserProvider";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -30,9 +32,12 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${poppins.className} antialiased`}
       >
+        <UserProvider>
+        <ToastContainer/>
         <Navbar/>
         {children}
         <Footer/>
+        </UserProvider>
       </body>
     </html>
   );

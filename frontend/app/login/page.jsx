@@ -156,16 +156,20 @@
 
 "use client";
 
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios"
+import { toast } from "react-toastify";
+import UserContext from "../../context/UserContext";
+
 
 const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function LoginPage() {
   const router = useRouter();
+  const { setUser } = useContext(UserContext);
 
   const [formData, setFormData] = useState({
-    role: "student",
     email: "",
     password: "",
   });
@@ -177,13 +181,44 @@ export default function LoginPage() {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    if (formData.role === "admin") router.push("/admin");
-    else if (formData.role === "warden") router.push("/warden");
+  if (formData.email.trim() === "") {
+    toast.warning("Please enter email !!", { position: "top-center" });
+    return;
+  }
+
+  if (formData.password.trim() === "") {
+    toast.warning("Please enter password !!", { position: "top-center" });
+    return;
+  }
+
+  try {
+    const res = await axios.post(
+      `${url}/api/v1/user/signin`,
+      { ...formData },
+      { withCredentials: true }
+    );
+
+    // console.log(res);
+    setUser(res.data.user);
+
+    toast.success("Logged in..", { position: "top-center" });
+
+    const role = res.data.role?.toLowerCase();
+
+    if (role === "admin") router.push("/admin");
+    else if (role === "warden") router.push("/warden");
     else router.push("/st_dashboard");
-  };
+
+  } catch (err) {
+    console.error(err);
+    toast.error("Error during login!!", {
+      position: "top-right"
+    });
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e1b4b] text-white px-4">
@@ -201,23 +236,6 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="space-y-5">
 
           <div>
-            <label className="text-gray-400 text-sm">Role</label>
-
-            <div className="relative mt-1">
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className="w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40 text-gray-600"
-              >
-                <option value="admin">Admin</option>
-                <option value="warden">Warden</option>
-                <option value="student">Student</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
             <label className="text-gray-400 text-sm">Email</label>
 
             <div className="relative mt-1">
@@ -227,12 +245,11 @@ export default function LoginPage() {
                 placeholder="Enter your email"
                 onChange={handleChange}
                 required
-                className="w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                className="w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500/40"
               />
             </div>
           </div>
 
-          {/* Password */}
           <div>
             <label className="text-gray-400 text-sm">Password</label>
 
@@ -243,15 +260,14 @@ export default function LoginPage() {
                 placeholder="Enter password"
                 onChange={handleChange}
                 required
-                className="w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
+                className="w-full pl-10 pr-3 py-3 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-1 focus:ring-indigo-500/40"
               />
             </div>
           </div>
 
-          {/* Login Button */}
           <button
             type="submit"
-            className="w-full py-3 rounded-lg font-medium bg-gradient-to-r from-indigo-500 to-purple-600 hover:scale-[1.02] hover:shadow-[0_0_20px_rgba(99,102,241,0.6)] transition-all duration-300"
+            className="w-full py-3 rounded-lg cursor-pointer font-medium bg-gradient-to-r from-indigo-500 to-purple-500 hover:scale-[1.02] hover:shadow-[0_0_15px_rgba(99,102,241,0.6)] transition-all duration-300"
           >
             Login to Dashboard
           </button>

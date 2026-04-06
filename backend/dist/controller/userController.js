@@ -8,11 +8,22 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateSelfProfile = exports.getSelfDetails = exports.changePassword = exports.logout = exports.signin = void 0;
+exports.updateSelfProfile = exports.getSelfDetails = exports.changePassword = exports.logout = exports.currentUser = exports.signin = void 0;
 const client_1 = require("@prisma/client");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const roleDashboard_1 = require("../utils/roleDashboard");
@@ -52,7 +63,8 @@ const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         return res.status(200).json({
             msg: "Login successful",
             role: user.role,
-            dashboard: (0, roleDashboard_1.getDashboardForRole)(user.role)
+            dashboard: (0, roleDashboard_1.getDashboardForRole)(user.role),
+            user
         });
     }
     catch (error) {
@@ -61,6 +73,41 @@ const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.signin = signin;
+const currentUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const token = req.cookies.token;
+        if (!token) {
+            return res.status(401).json({
+                msg: "no token, authorization denied"
+            });
+        }
+        const secretKey = process.env.JWT_SECRET;
+        if (!secretKey) {
+            return res.status(500).json({ msg: "JWT secret not configured" });
+        }
+        const data = jsonwebtoken_1.default.verify(token, secretKey);
+        const user = yield prisma.user.findFirst({
+            where: {
+                id: data.userId
+            }
+        });
+        if (!user) {
+            return res.status(404).json({
+                msg: "User not found",
+            });
+        }
+        const { password } = user, userWithoutPassword = __rest(user, ["password"]);
+        return res.status(200).json({
+            user: userWithoutPassword,
+        });
+    }
+    catch (error) {
+        return res.status(401).json({
+            msg: "Invalid or expired token",
+        });
+    }
+});
+exports.currentUser = currentUser;
 const logout = (req, res) => {
     res.clearCookie("token", {
         httpOnly: true,
