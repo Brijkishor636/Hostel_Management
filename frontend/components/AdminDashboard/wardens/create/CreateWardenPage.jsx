@@ -5,7 +5,12 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Loader2 } from "lucide-react";
-import InputField from "../../ui/InputField"; 
+import InputField from "../../ui/InputField";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify"; // ✅ added
+import "react-toastify/dist/ReactToastify.css"; // ✅ added
+
+const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const wardenSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -29,18 +34,26 @@ export default function CreateWardenPage() {
       email: "",
       password: "",
       mobNo: "",
-    }
+    },
   });
 
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log("Warden Created:", data);
+      const res = await axios.post(
+        `${url}/api/v1/admin/create-warden`,
+        data,
+        {
+          withCredentials: true,
+        }
+      );
+
+      console.log("Warden Created:", res.data);
       reset();
-      alert("Warden account created successfully!");
+      toast.success("Warden account created successfully!"); // ✅ replaced
     } catch (error) {
       console.error(error);
+      toast.error(error?.response?.data?.message || "Something went wrong"); // ✅ replaced
     } finally {
       setIsLoading(false);
     }
@@ -107,11 +120,17 @@ export default function CreateWardenPage() {
             </div>
           </form>
         </div>
-        
+
         <p className="text-center text-slate-600 text-sm mt-4 md:mt-8">
-          System Access Only. Need help? <span className="text-violet-500 cursor-pointer hover:underline">Contact Support</span>
+          System Access Only. Need help?{" "}
+          <span className="text-violet-500 cursor-pointer hover:underline">
+            Contact Support
+          </span>
         </p>
       </div>
+
+      {/* ✅ Toast container */}
+      <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );
 }

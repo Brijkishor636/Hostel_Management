@@ -25,7 +25,7 @@ export default function CreateStudentPage() {
     }
   });
 
-  const onSubmit = async (data) => {
+const onSubmit = async (data) => {
   setIsLoading(true);
   try {
     const url = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -35,19 +35,26 @@ export default function CreateStudentPage() {
       headers: {
         "Content-Type": "application/json",
       },
-      credentials: "include"
+      credentials: "include",
+      body: JSON.stringify(data),
     });
 
     const result = await res.json();
+
+    if (!res.ok) {
+      throw new Error(result.msg || "Failed");
+    }
+
     reset();
     toast.success("Student created successfully..", {
       position: "top-center"
-    })
+    });
+
   } catch (error) {
     console.error(error);
-    toast.error("error during creating!!", {
+    toast.error(error.message || "error during creating!!", {
       position: "top-right"
-    })
+    });
   } finally {
     setIsLoading(false);
   }

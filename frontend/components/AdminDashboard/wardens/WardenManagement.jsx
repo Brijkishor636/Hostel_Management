@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Card from "../ui/Cards";
 import Badge from "../ui/Badge";
 import Button from "../ui/Button";
@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 const MOCK_WARDENS = [
   {
@@ -36,12 +37,30 @@ const MOCK_WARDENS = [
 
 const WardenManagement = () => {
   const [search, setSearch] = useState("");
+  const [wardens, setWardens] = useState([]); 
   const router = useRouter();
+  const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  const filteredWardens = MOCK_WARDENS.filter(
-    (w) =>
-      w.name.toLowerCase().includes(search.toLowerCase()) ||
-      w.assignedBlock.toLowerCase().includes(search.toLowerCase())
+  const role = "admin";
+
+  useEffect(() => {
+    async function fetchWardens() {
+      try {
+        const res = await axios.get(`${url}/api/v1/${role}/wardens`, {
+          withCredentials: true,
+        });
+
+        setWardens(res?.data || []); 
+      } catch (error) {
+        console.error("Error fetching wardens:", error);
+      }
+    }
+
+    fetchWardens();
+  }, [url, role]);
+
+  const filteredWardens = wardens.filter((warden) =>
+    warden.name.toLowerCase().includes(search.toLowerCase())
   );
 
   const clearSearch = () => setSearch("");
@@ -135,9 +154,9 @@ const WardenManagement = () => {
                   <td className="px-8 py-5">{warden.name}</td>
                   <td className="px-6 py-5">{warden.assignedBlock}</td>
                   <td className="px-6 py-5">{warden.email}</td>
-                  <td className="px-6 py-5">{warden.phone}</td>
+                  <td className="px-6 py-5">{warden.mobNo}</td>
                   <td className="px-6 py-5">
-                    <Badge variant={warden.status === "Active" ? "success" : "error"}>
+                    <Badge variant={warden.status === "Active" ? "success" : "Active"}>
                       {warden.status}
                     </Badge>
                   </td>
@@ -166,8 +185,8 @@ const WardenManagement = () => {
               <div className="mt-3 text-sm space-y-2">
                 <p>Block: {warden.assignedBlock}</p>
                 <p className="truncate">Email: {warden.email}</p>
-                <p>Phone: {warden.phone}</p>
-                <Badge variant={warden.status === "Active" ? "success" : "error"}>
+                <p>Phone: {warden.mobNo}</p>
+                <Badge variant={warden.status === "Active" ? "success" : "Active"}>
                   {warden.status}
                 </Badge>
               </div>
@@ -177,7 +196,7 @@ const WardenManagement = () => {
 
         <div className="px-4 md:px-8 py-4 md:py-5 border-t border-white/10 flex flex-col sm:flex-row lg:flex-row items-center lg:items-center justify-between gap-4 text-xs text-gray-500 bg-white/5">
           <p className="w-full text-left sm:w-auto lg:w-auto lg:flex lg:items-center lg:h-full">
-            {filteredWardens.length} / {MOCK_WARDENS.length}
+            {filteredWardens.length} / {wardens.length}
           </p>
 
           <div className="flex gap-2 w-full sm:w-auto lg:w-auto lg:items-center">
