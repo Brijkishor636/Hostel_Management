@@ -40,15 +40,7 @@ export const createStudent = async (req: Request, res: Response) =>{
                         regNo: parsed.data.regNo,
                     hostel: {
                       connect: { id: hostelId }
-                    },
-                    room: {
-                        create: {
-                            number: parsed.data.roomNo!,
-                            hostel:{
-                                connect: {id: hostelId}
-                            }
-                        }
-                    }
+                    },              
                   }
                 },
             }
@@ -66,45 +58,81 @@ export const createStudent = async (req: Request, res: Response) =>{
 }
 
 
-export const getStudents = async (req: Request, res: Response) =>{
-    try{
-        const hostelId = req.user?.hostelId;
-        const allStudents = await prisma.user.findMany({
-            where: {
-                role: "STUDENT",
-                hostelId: hostelId,
-                isActive: true
+export const getStudents = async (req: Request, res: Response) => {
+  try {
+    const hostelId = req.user?.hostelId;
+
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 15;
+    const search = (req.query.search as string) || "";
+
+    const skip = (page - 1) * limit;
+
+    const whereCondition: any = {
+      role: "STUDENT",
+      hostelId: hostelId,
+      isActive: true,
+      OR: [
+        {
+          name: {
+            contains: search,
+            mode: "insensitive",
+          },
+        },
+        {
+          student: {
+            regNo: {
+              contains: search,
+              mode: "insensitive",
             },
-            select:{
-                ...safeUserSelect,
-                student: {
-                    select: {
-                        id: true,
-                        regNo: true,
-                        room: {
-                            select: {
-                                id: true,
-                                number: true,
-                            }
-                        }
-                    }
-                },
-                hostel: {
-                    select: {
-                        name: true
-                    }
-                }
-            }
-        })
-        return res.status(200).json(allStudents);
-    }
-    catch(e){
-        console.log(e);
-        return res.status(500).json({
-            msg: "Internal server error!!"
-        })
-    }
-}
+          },
+        },
+      ],
+    };
+
+    const total = await prisma.user.count({
+      where: whereCondition,
+    });
+
+    const students = await prisma.user.findMany({
+      where: whereCondition,
+      skip,
+      take: limit,
+      select: {
+        ...safeUserSelect,
+        student: {
+          select: {
+            id: true,
+            regNo: true,
+            room: {
+              select: {
+                id: true,
+                number: true,
+              },
+            },
+          },
+        },
+        hostel: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    return res.status(200).json({
+      students,
+      total,
+      page,
+      limit,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      msg: "Internal server error!!",
+    });
+  }
+};
 
 
 export const getSingleStudent = async (req: Request, res: Response) =>{

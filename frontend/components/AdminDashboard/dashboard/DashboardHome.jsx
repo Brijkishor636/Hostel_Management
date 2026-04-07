@@ -1,10 +1,11 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Card from "../ui/Cards";
 import Badge from "../ui/Badge";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Users, DoorOpen, DollarSign, AlertCircle, ArrowUpRight, Activity } from "lucide-react";
 import { MOCK_COMPLAINTS } from "../../constants";
+import { useDashboardData } from "../../../hooks/useDashboardData";
 
 const chartData = [
   { name: "Jan", revenue: 4000 },
@@ -39,27 +40,22 @@ const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const DashboardHome = () => {
 
-  const [students, setStudents] = useState([]);
+  const {
+    totalStudents,
+    totalRooms,
+    occupiedRooms,
+    loading,
+    error,
+  } = useDashboardData("admin");
 
-  useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        const res = await fetch(`${url}/api/v1/admin/students`);
-        const data = await res.json();
-        setStudents(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchStudents();
-  }, []);
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>Error: {error}</p>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e1b4b] text-white p-6 space-y-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-        <StatCard title="Total Students" value="220" icon={<Users size={24} />} trend="+12%" color="violet" />
-        <StatCard title="Occupied Rooms" value="124/150" icon={<DoorOpen size={24} />} trend="+5%" color="blue" />
+        <StatCard title="Total Students" value={totalStudents} icon={<Users size={24} />} trend="+12%" color="violet" />
+        <StatCard title="Occupied Rooms" value={`${occupiedRooms}/${totalRooms}`} icon={<DoorOpen size={24} />} trend="+5%" color="blue" />
         <StatCard title="Total Revenue" value="$42,390" icon={<DollarSign size={24} />} trend="+18%" color="emerald" />
         <StatCard title="Open Complaints" value="12" icon={<AlertCircle size={24} />} trend="-2%" color="rose" />
       </div>

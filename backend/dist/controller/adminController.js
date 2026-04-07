@@ -54,14 +54,6 @@ const createStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         hostel: {
                             connect: { id: hostelId }
                         },
-                        room: {
-                            create: {
-                                number: parsed.data.roomNo,
-                                hostel: {
-                                    connect: { id: hostelId }
-                                }
-                            }
-                        }
                     }
                 },
             }
@@ -82,12 +74,38 @@ const getStudents = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     var _a;
     try {
         const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
-        const allStudents = yield prisma.user.findMany({
-            where: {
-                role: "STUDENT",
-                hostelId: hostelId,
-                isActive: true
-            },
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 15;
+        const search = req.query.search || "";
+        const skip = (page - 1) * limit;
+        const whereCondition = {
+            role: "STUDENT",
+            hostelId: hostelId,
+            isActive: true,
+            OR: [
+                {
+                    name: {
+                        contains: search,
+                        mode: "insensitive",
+                    },
+                },
+                {
+                    student: {
+                        regNo: {
+                            contains: search,
+                            mode: "insensitive",
+                        },
+                    },
+                },
+            ],
+        };
+        const total = yield prisma.user.count({
+            where: whereCondition,
+        });
+        const students = yield prisma.user.findMany({
+            where: whereCondition,
+            skip,
+            take: limit,
             select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { student: {
                     select: {
                         id: true,
@@ -96,21 +114,26 @@ const getStudents = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                             select: {
                                 id: true,
                                 number: true,
-                            }
-                        }
-                    }
+                            },
+                        },
+                    },
                 }, hostel: {
                     select: {
-                        name: true
-                    }
-                } })
+                        name: true,
+                    },
+                } }),
         });
-        return res.status(200).json(allStudents);
+        return res.status(200).json({
+            students,
+            total,
+            page,
+            limit,
+        });
     }
     catch (e) {
         console.log(e);
         return res.status(500).json({
-            msg: "Internal server error!!"
+            msg: "Internal server error!!",
         });
     }
 });

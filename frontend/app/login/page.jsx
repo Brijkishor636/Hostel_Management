@@ -274,12 +274,12 @@ export default function LoginPage() {
 
         </form>
 
-        <p className="text-center text-sm text-gray-400 mt-6">
+        {/* <p className="text-center text-sm text-gray-400 mt-6">
           Don’t have an account?
           <a href="/signup" className="text-indigo-400 hover:underline ml-1">
             Sign up
           </a>
-        </p>
+        </p> */}
 
       </div>
 

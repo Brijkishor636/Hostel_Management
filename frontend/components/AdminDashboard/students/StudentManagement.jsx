@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Card from "../ui/Cards";
 import Badge from "../ui/Badge";
 import Button from "../ui/Button";
@@ -12,20 +12,36 @@ import {
   X as CloseIcon,
   Download,
 } from "lucide-react";
-import { MOCK_STUDENTS } from "../../constants";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
+import { useStudents } from "../../../hooks/useStudents";
 
 const StudentManagement = () => {
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const limit = 15;
+
   const router = useRouter();
   const pathname = usePathname();
 
-  const filteredStudents = MOCK_STUDENTS.filter(
-    (s) =>
-      s.name.toLowerCase().includes(search.toLowerCase()) ||
-      s.roomNumber.toLowerCase().includes(search.toLowerCase())
-  );
+  const role = pathname.startsWith("/warden") ? "warden" : "admin";
+
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    setDebouncedSearch(search);
+  }, 500);
+
+  return () => clearTimeout(timer);
+}, [search]);
+
+  const { students, total, loading } = useStudents({
+    role,
+    page,
+    limit,
+    search : debouncedSearch,
+  });
 
   const clearSearch = () => setSearch("");
 
@@ -37,9 +53,12 @@ const StudentManagement = () => {
 
   const baseRoute = pathname.startsWith("/warden") ? "/warden" : "/admin";
 
+  if (loading) return <p className="text-white p-6">Loading...</p>;
+
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e1b4b] text-white p-4 space-y-10">
 
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-xl sm:text-3xl font-bold flex items-center gap-3">
@@ -60,24 +79,26 @@ const StudentManagement = () => {
         </Button>
       </div>
 
+      {/* Search + Buttons */}
       <div className="flex flex-col lg:flex-row items-center gap-4 p-[1px] rounded-2xl bg-gradient-to-r from-indigo-500/20 via-purple-300/20 to-indigo-500/20">
         <div className="flex flex-col lg:flex-row items-center gap-4 w-full bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-2">
 
+          {/* Search */}
           <div className="relative flex-1 w-full group">
-            <Search
-              className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-gray-500"
-              size={16}
-            />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
 
             <input
               type="text"
               placeholder="Search students..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full bg-transparent border border-white/10 rounded-xl py-2 md:py-3.5 pl-10 md:pl-12 pr-10 text-sm md:text-base focus:outline-none focus:ring-1 focus:ring-indigo-500/40 placeholder:text-gray-500"
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(1);
+              }}
+              className="w-full bg-transparent border border-white/10 rounded-xl py-3 pl-10 pr-10 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500/40 placeholder:text-gray-500"
             />
 
-            <div className="absolute inset-y-0 right-2 md:right-4 flex items-center">
+            <div className="absolute inset-y-0 right-3 flex items-center">
               <AnimatePresence>
                 {search && (
                   <motion.button
@@ -94,6 +115,7 @@ const StudentManagement = () => {
             </div>
           </div>
 
+          {/* Buttons (RESTORED ✅) */}
           <div className="flex w-full lg:w-auto gap-2 md:gap-3">
             <button className="flex-1 md:flex-none flex items-center justify-center px-3 md:px-4 py-2 md:py-3 rounded-xl bg-white/5 border border-white/10 text-gray-300">
               <Filter size={16} />
@@ -105,11 +127,12 @@ const StudentManagement = () => {
               <span className="hidden lg:inline ml-2">Export CSV</span>
             </button>
           </div>
+
         </div>
       </div>
 
+      {/* Table */}
       <Card className="!p-0 overflow-hidden border-white/10 bg-white/5 backdrop-blur-md">
-
         <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-left text-sm">
             <thead className="bg-white/5 text-gray-400 text-[11px]">
@@ -117,29 +140,21 @@ const StudentManagement = () => {
                 <th className="px-8 py-5">Resident Info</th>
                 <th className="px-6 py-5">Room</th>
                 <th className="px-6 py-5">Email Address</th>
-                <th className="px-6 py-5">Payment Status</th>
+                <th className="px-6 py-5">Reg No</th>
                 <th className="px-8 py-5 text-right">Action</th>
               </tr>
             </thead>
 
             <tbody className="divide-y divide-white/5">
-              {filteredStudents.map((student) => (
+              {students.map((student) => (
                 <tr key={student.id}>
                   <td className="px-8 py-5">{student.name}</td>
-                  <td className="px-6 py-5">{student.roomNumber}</td>
+                  <td className="px-6 py-5">
+                    {student.student?.room?.number || "N/A"}
+                  </td>
                   <td className="px-6 py-5">{student.email}</td>
                   <td className="px-6 py-5">
-                    <Badge
-                      variant={
-                        student.paymentStatus === "Paid"
-                          ? "success"
-                          : student.paymentStatus === "Pending"
-                          ? "warning"
-                          : "error"
-                      }
-                    >
-                      {student.paymentStatus}
-                    </Badge>
+                    {student.student?.regNo}
                   </td>
                   <td className="px-8 py-5 text-right">
                     <MoreVertical size={20} />
@@ -150,50 +165,26 @@ const StudentManagement = () => {
           </table>
         </div>
 
-        <div className="md:hidden space-y-3 p-3">
-          {filteredStudents.map((student) => (
-            <div key={student.id} className="p-3 rounded-xl bg-white/5 border border-white/10">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                  {student.name.charAt(0)}
-                </div>
-                <div>
-                  <p className="font-semibold">{student.name}</p>
-                  <p className="text-xs text-gray-400">#{student.id}</p>
-                </div>
-              </div>
+        {/* Footer */}
+        <div className="px-6 py-4 border-t border-white/10 flex justify-between text-sm text-gray-400">
+          <p>{students.length} / {total}</p>
 
-              <div className="mt-3 text-sm space-y-2">
-                <p>Room: {student.roomNumber}</p>
-                <p className="truncate">Email: {student.email}</p>
-
-                <span
-                  className={`px-2 py-1 rounded-lg text-xs ${getStatusColor(
-                    student.paymentStatus
-                  )}`}
-                >
-                  {student.paymentStatus}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="px-4 md:px-8 py-4 md:py-5 border-t border-white/10 flex flex-col sm:flex-row lg:flex-row items-center lg:items-center justify-between gap-4 text-xs text-gray-500 bg-white/5">
-
-          <p className="w-full text-left sm:w-auto lg:w-auto lg:flex lg:items-center lg:h-full">
-            {filteredStudents.length} / {MOCK_STUDENTS.length}
-          </p>
-
-          <div className="flex gap-2 w-full sm:w-auto lg:w-auto lg:items-center">
-            <button className="flex-1 sm:flex-none px-4 py-2 bg-white/5 rounded-lg">
+          <div className="flex gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(p - 1, 1))}
+              className="px-4 py-2 bg-white/5 rounded-lg"
+            >
               Prev
             </button>
-            <button className="flex-1 sm:flex-none px-4 py-2 bg-white/5 rounded-lg">
+
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page * limit >= total}
+              className="px-4 py-2 bg-white/5 rounded-lg disabled:opacity-50"
+            >
               Next
             </button>
           </div>
-
         </div>
       </Card>
     </div>

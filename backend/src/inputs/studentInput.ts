@@ -1,12 +1,11 @@
-import z, { email } from "zod";
+import z from "zod";
 
 export const createStudentInput = z.object({
     name: z.string(),
     email: z.string().email(),
     password: z.string().min(4),
     mobNo: z.string(),
-    regNo: z.string(),
-    roomNo: z.string().min(3).optional()
+    regNo: z.string()
 })
 
 export const updateStudentSchema = z.object({

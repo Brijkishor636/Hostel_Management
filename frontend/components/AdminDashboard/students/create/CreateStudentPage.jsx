@@ -2,20 +2,10 @@
 
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Loader2 } from "lucide-react";
 import InputField from "../../ui/InputField"; 
+import { toast } from "react-toastify";
 
-
-const studentSchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(4, "Password must be at least 4 characters"),
-  mobNo: z.string().regex(/^[0-9+\s-]{10,}$/, "Invalid mobile number"),
-  regNo: z.string().min(1, "Registration number is required"),
-  roomNo: z.string().min(3, "Room number must be at least 3 characters").optional().or(z.literal("")),
-});
 
 export default function CreateStudentPage() {
   const [isLoading, setIsLoading] = useState(false);
@@ -26,33 +16,44 @@ export default function CreateStudentPage() {
     formState: { errors },
     reset,
   } = useForm({
-    resolver: zodResolver(studentSchema),
     defaultValues: {
       name: "",
       email: "",
       password: "",
       mobNo: "",
       regNo: "",
-      roomNo: "",
     }
   });
 
   const onSubmit = async (data) => {
-    setIsLoading(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      console.log("Student Created:", data);
-      reset();
-      alert("Student created successfully!");
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  setIsLoading(true);
+  try {
+    const url = process.env.NEXT_PUBLIC_BACKEND_URL;
+
+    const res = await fetch(`${url}/api/v1/admin/create-student`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include"
+    });
+
+    const result = await res.json();
+    reset();
+    toast.success("Student created successfully..", {
+      position: "top-center"
+    })
+  } catch (error) {
+    console.error(error);
+    toast.error("error during creating!!", {
+      position: "top-right"
+    })
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
-    // Minimal Deep Velvet background
     <div className="min-h-screen w-full flex items-center justify-center p-2 md:p-5 lg:p-8 bg-slate-950 text-slate-100">
       <div className="w-full md:max-w-4xl lg:max-w-7xl animate-in fade-in zoom-in duration-500">
         
@@ -62,7 +63,6 @@ export default function CreateStudentPage() {
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-y-8">
             
-            {/* Minimal Title */}
             <h1 className="text-3xl font-extrabold text-white tracking-tight text-center md:text-left">
               New Student
             </h1>
@@ -100,7 +100,6 @@ export default function CreateStudentPage() {
                 error={errors.mobNo?.message}
               />
 
-              {/* Password and Room No (Still in grid, responsive) */}
               <InputField
                 label="Password"
                 isPassword
@@ -109,12 +108,6 @@ export default function CreateStudentPage() {
                 error={errors.password?.message}
               />
               
-              <InputField
-                label="Room Number (Optional)"
-                placeholder="e.g. Dorm A-204"
-                {...register("roomNo")}
-                error={errors.roomNo?.message}
-              />
             </div>
 
             {/* Submit Button Area - Minimal placement */}
