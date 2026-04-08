@@ -4,6 +4,7 @@ import { authorizeRole } from "../middlewares/roleMiddleware";
 import { createStudent, createWarden, deleteStudent, deleteWarden, getAdmins, getSingleStudent, getSingleWarden, getStudents, getwardens, updateStudent, updateUser} from "../controller/adminController";
 import { getSelfDetails, updateSelfProfile } from "../controller/userController";
 import { allocateRoom, createRooms, deleteRoom, getAllRooms, getSingleRoom, updateRoom } from "../controller/roomController";
+import { createCharge, generatePayments, getCharges } from "../controller/paymentController";
 
 const adminRouter = express.Router();
 
@@ -47,5 +48,9 @@ adminRouter.get("/rooms/:roomNo", (req: Request, res: Response) => getSingleRoom
 adminRouter.put("/rooms/update/:roomNum", (req: Request, res: Response) => updateRoom(req, res));
 
 adminRouter.delete("/rooms/:roomNo", (req: Request, res: Response) => deleteRoom(req, res));
+
+adminRouter.post("/charges", createCharge);            
+adminRouter.get("/charges", getCharges);                 
+adminRouter.post("/payments/generate", generatePayments); 
 
 export default adminRouter;

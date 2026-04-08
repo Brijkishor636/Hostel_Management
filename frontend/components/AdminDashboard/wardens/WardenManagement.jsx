@@ -16,24 +16,24 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
-const MOCK_WARDENS = [
-  {
-    id: "W1",
-    name: "Rahul Sharma",
-    email: "rahul@hostel.com",
-    phone: "9876543210",
-    assignedBlock: "Block A",
-    status: "Active",
-  },
-  {
-    id: "W2",
-    name: "Amit Kumar",
-    email: "amit@hostel.com",
-    phone: "9123456780",
-    assignedBlock: "Block B",
-    status: "Inactive",
-  },
-];
+// const MOCK_WARDENS = [
+//   {
+//     id: "W1",
+//     name: "Rahul Sharma",
+//     email: "rahul@hostel.com",
+//     phone: "9876543210",
+//     assignedBlock: "Block A",
+//     status: "Active",
+//   },
+//   {
+//     id: "W2",
+//     name: "Amit Kumar",
+//     email: "amit@hostel.com",
+//     phone: "9123456780",
+//     assignedBlock: "Block B",
+//     status: "Inactive",
+//   },
+// ];
 
 const WardenManagement = () => {
   const [search, setSearch] = useState("");
