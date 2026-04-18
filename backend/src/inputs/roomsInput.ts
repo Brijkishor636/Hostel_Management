@@ -1,14 +1,15 @@
 import z from "zod";
 
 export const allocateRoomsInput = z.object({
-    studnetId: z.string(),
-    roomNo: z.string().min(3)
+    studentId: z.string(),
+    roomNo: z.string().min(1)
 })
 
 export const createRoomsInput = z.object({
   rooms: z.array(
     z.object({
-      roomNo: z.string().min(3)
+      roomNo: z.string().min(1),
+      capacity: z.number().min(1)
     })
   ).min(1)
 });

@@ -1,7 +1,7 @@
 import express, {Request, Response} from "express";
 import { verifyToken } from "../middlewares/authMiddleware";
 import { authorizeRole } from "../middlewares/roleMiddleware";
-import { createStudent, createWarden, deleteStudent, deleteWarden, getAdmins, getSingleStudent, getSingleWarden, getStudents, getwardens, updateStudent, updateUser} from "../controller/adminController";
+import { createStudent, createWarden, deleteStudent, deleteWarden, getAdmins, getSingleStudent, getSingleWarden, getStudents, getUnassignedStudents, getwardens, updateStudent, updateUser} from "../controller/adminController";
 import { getSelfDetails, updateSelfProfile } from "../controller/userController";
 import { allocateRoom, createRooms, deleteRoom, getAllRooms, getSingleRoom, updateRoom } from "../controller/roomController";
 import { createCharge, generatePayments, getCharges } from "../controller/paymentController";
@@ -43,11 +43,14 @@ adminRouter.post("/rooms/create", (req: Request, res: Response) => createRooms(r
 
 adminRouter.get("/rooms", (req: Request, res: Response) => getAllRooms(req, res));
 
-adminRouter.get("/rooms/:roomNo", (req: Request, res: Response) => getSingleRoom(req, res));
+adminRouter.get("/rooms/:id", (req: Request, res: Response) => getSingleRoom(req, res));
 
 adminRouter.put("/rooms/update/:roomNum", (req: Request, res: Response) => updateRoom(req, res));
 
 adminRouter.delete("/rooms/:roomNo", (req: Request, res: Response) => deleteRoom(req, res));
+
+
+adminRouter.get("/unassigned-student", (req: Request, res: Response) => getUnassignedStudents(req, res));
 
 adminRouter.post("/charges", createCharge);            
 adminRouter.get("/charges", getCharges);                 

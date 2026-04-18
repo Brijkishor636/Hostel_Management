@@ -457,3 +457,37 @@ export const getAdmins = async (req: Request, res: Response) =>{
     }
 }
 
+
+
+export const getUnassignedStudents = async (req: Request, res: Response) => {
+  try {
+    const hostelId = req.user?.hostelId;
+
+    const unassignedStudents = await prisma.student.findMany({
+      where: {
+        hostelId,
+        roomId: null,
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            mobNo: true,
+          },
+        },
+      },
+    });
+
+    return res.status(200).json({
+      students: unassignedStudents,
+    });
+
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      msg: "Internal server error!",
+    });
+  }
+};

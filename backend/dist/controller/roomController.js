@@ -17,61 +17,66 @@ const prisma = new client_1.PrismaClient();
 const allocateRoom = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
-        const parsed = roomsInput_1.allocateRoomsInput.safeParse(req.body);
-        if (!parsed.success) {
-            return res.status(401).json({
-                msg: "Incorrect inputs!!"
+        const { studentId, roomId } = req.body;
+        if (!studentId || !roomId) {
+            return res.status(400).json({
+                msg: "StudentId and RoomId are required",
             });
         }
         const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
         const student = yield prisma.student.findFirst({
-            where: { id: parsed.data.studnetId }
+            where: { id: studentId },
         });
-        if (!student || student.hostelId != hostelId) {
-            return res.status(404).json({
-                msg: "Student not found"
-            });
+        if (!student || student.hostelId !== hostelId) {
+            return res.status(404).json({ msg: "Student not found" });
         }
         if (student.roomId) {
             return res.status(400).json({
-                msg: "Room already allocated, for student"
+                msg: "Room already allocated for this student",
             });
         }
         const room = yield prisma.room.findFirst({
-            where: { hostelId: hostelId, number: parsed.data.roomNo }
+            where: {
+                id: roomId,
+                hostelId,
+            },
         });
         if (!room) {
-            return res.status(404).json({
-                msg: "Room not found!!"
+            return res.status(404).json({ msg: "Room not found" });
+        }
+        if (room.status === "MAINTENANCE") {
+            return res.status(400).json({
+                msg: "Room is under maintenance",
             });
         }
         if (room.occupancy >= room.capacity) {
-            return res.status(400).json({ msg: "Room is full" });
+            return res.status(400).json({
+                msg: "Room is full",
+            });
         }
         yield prisma.$transaction([
             prisma.student.update({
-                where: { id: parsed.data.studnetId },
-                data: {
-                    roomId: room.id
-                }
+                where: { id: studentId },
+                data: { roomId: room.id },
             }),
             prisma.room.update({
                 where: { id: room.id },
                 data: {
                     occupancy: { increment: 1 },
                     status: room.occupancy + 1 >= room.capacity
-                        ? "FULL" : "AVAILABLE"
-                }
-            })
+                        ? "FULL"
+                        : "AVAILABLE",
+                },
+            }),
         ]);
         return res.status(200).json({
-            msg: "Room allocated successfully..."
+            msg: "Room allocated successfully",
         });
     }
     catch (e) {
         console.log(e);
         return res.status(500).json({
-            msg: "Internal server error!!"
+            msg: "Internal server error!!",
         });
     }
 });
@@ -81,24 +86,30 @@ const createRooms = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     try {
         const parsed = roomsInput_1.createRoomsInput.safeParse(req.body);
         if (!parsed.success) {
-            return res.status(400).json({ msg: "Incorrect inputs" });
+            return res.status(400).json({
+                msg: "Incorrect inputs"
+            });
         }
         const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
-        const roomData = parsed.data.rooms.map(r => ({
+        const roomData = parsed.data.rooms.map((r) => ({
             number: r.roomNo,
-            hostelId
+            capacity: r.capacity,
+            hostelId,
         }));
-        yield prisma.room.createMany({
+        const result = yield prisma.room.createMany({
             data: roomData,
-            skipDuplicates: true
+            skipDuplicates: true,
         });
         return res.status(201).json({
-            msg: "Rooms created successfully"
+            msg: "Rooms created successfully",
+            count: result.count,
         });
     }
     catch (e) {
         console.log(e);
-        return res.status(500).json({ msg: "Internal server error" });
+        return res.status(500).json({
+            msg: "Internal server error",
+        });
     }
 });
 exports.createRooms = createRooms;
@@ -106,8 +117,19 @@ const getAllRooms = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     var _a;
     try {
         const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
-        const allRooms = yield prisma.room.findMany({
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 12;
+        const skip = (page - 1) * limit;
+        const total = yield prisma.room.count({
+            where: { hostelId }
+        });
+        const rooms = yield prisma.room.findMany({
             where: { hostelId },
+            skip,
+            take: limit,
+            orderBy: {
+                number: "asc"
+            },
             select: Object.assign(Object.assign({}, roomSelector_1.safeRoomSelector), { students: {
                     select: {
                         id: true,
@@ -115,7 +137,12 @@ const getAllRooms = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                     }
                 } })
         });
-        return res.status(200).json(allRooms);
+        return res.status(200).json({
+            rooms,
+            total,
+            page,
+            limit
+        });
     }
     catch (e) {
         console.log(e);
@@ -129,25 +156,38 @@ const getSingleRoom = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     var _a;
     try {
         const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
-        const roomNo = req.params.roomNo;
+        const id = req.params.id;
         const singleRoom = yield prisma.room.findFirst({
             where: {
+                id,
                 hostelId,
-                number: roomNo
             },
             select: Object.assign(Object.assign({}, roomSelector_1.safeRoomSelector), { students: {
                     select: {
                         id: true,
                         regNo: true,
-                    }
-                } })
+                        user: {
+                            select: {
+                                name: true,
+                                email: true,
+                            },
+                        },
+                    },
+                } }),
         });
-        return res.status(200).json(singleRoom);
+        if (!singleRoom) {
+            return res.status(404).json({
+                msg: "Room not found",
+            });
+        }
+        return res.status(200).json({
+            room: singleRoom,
+        });
     }
     catch (e) {
         console.log(e);
         return res.status(500).json({
-            msg: "Internal server error!!"
+            msg: "Internal server error!!",
         });
     }
 });

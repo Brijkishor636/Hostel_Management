@@ -5,149 +5,207 @@ import { safeRoomSelector } from "../selectors/roomSelector";
 
 const prisma = new PrismaClient();
 
-export const allocateRoom = async (req: Request, res: Response) =>{
-    try{
-        const parsed = allocateRoomsInput.safeParse(req.body);
-        if(!parsed.success){
-            return res.status(401).json({
-                msg: "Incorrect inputs!!"
-            })
-        }
-        const hostelId = req.user?.hostelId;
-        const student = await prisma.student.findFirst({
-            where: { id: parsed.data.studnetId }
-        })
-        if(!student || student.hostelId != hostelId){
-            return res.status(404).json({
-                msg: "Student not found"
-            })
-        }
-        if(student.roomId){
-            return res.status(400).json({
-                msg: "Room already allocated, for student"
-            })
-        }
-        const room = await prisma.room.findFirst({
-            where: {hostelId: hostelId, number: parsed.data.roomNo}
-        })
-        if(!room){
-            return res.status(404).json({
-                msg: "Room not found!!"
-            })
-        }
-        if (room.occupancy >= room.capacity) {
-            return res.status(400).json({ msg: "Room is full" });
-        }
-        await prisma.$transaction([
-          prisma.student.update({
-            where: { id: parsed.data.studnetId},
-            data: {
-                roomId: room.id
-            }
-          }),
-          prisma.room.update({
-            where: { id: room.id },
-            data: {
-              occupancy: { increment: 1 },
-              status: 
-                room.occupancy + 1 >= room.capacity
-                    ? "FULL" : "AVAILABLE"
-            }
-          })
-        ]);
+export const allocateRoom = async (req: Request, res: Response) => {
+  try {
+    const { studentId, roomId } = req.body;
+
+    if (!studentId || !roomId) {
+      return res.status(400).json({
+        msg: "StudentId and RoomId are required",
+      });
+    }
+    const hostelId = req.user?.hostelId;
+    const student = await prisma.student.findFirst({
+      where: { id: studentId },
+    });
+
+    if (!student || student.hostelId !== hostelId) {
+      return res.status(404).json({ msg: "Student not found" });
+    }
+
+    if (student.roomId) {
+      return res.status(400).json({
+        msg: "Room already allocated for this student",
+      });
+    }
+    const room = await prisma.room.findFirst({
+      where: {
+        id: roomId,
+        hostelId,
+      },
+    });
+
+    if (!room) {
+      return res.status(404).json({ msg: "Room not found" });
+    }
+
+    if (room.status === "MAINTENANCE") {
+      return res.status(400).json({
+        msg: "Room is under maintenance",
+      });
+    }
+
+    if (room.occupancy >= room.capacity) {
+      return res.status(400).json({
+        msg: "Room is full",
+      });
+    }
+
+    await prisma.$transaction([
+      prisma.student.update({
+        where: { id: studentId },
+        data: { roomId: room.id },
+      }),
+      prisma.room.update({
+        where: { id: room.id },
+        data: {
+          occupancy: { increment: 1 },
+          status:
+            room.occupancy + 1 >= room.capacity
+              ? "FULL"
+              : "AVAILABLE",
+        },
+      }),
+    ]);
+
     return res.status(200).json({
-        msg: "Room allocated successfully..."
-    })
-    }
-    catch(e){
-        console.log(e);
-        return res.status(500).json({
-            msg: "Internal server error!!"
-        })
-    }
-}
+      msg: "Room allocated successfully",
+    });
+
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      msg: "Internal server error!!",
+    });
+  }
+};
 
 
 export const createRooms = async (req: Request, res: Response) => {
   try {
     const parsed = createRoomsInput.safeParse(req.body);
+
     if (!parsed.success) {
-      return res.status(400).json({ msg: "Incorrect inputs" });
+      return res.status(400).json({
+        msg: "Incorrect inputs"
+      });
     }
+
     const hostelId = req.user?.hostelId;
-    const roomData = parsed.data.rooms.map(r => ({
+
+    const roomData = parsed.data.rooms.map((r) => ({
       number: r.roomNo,
-      hostelId
+      capacity: r.capacity, 
+      hostelId,
     }));
 
-    await prisma.room.createMany({
+    const result = await prisma.room.createMany({
       data: roomData,
-      skipDuplicates: true 
+      skipDuplicates: true,
     });
+
     return res.status(201).json({
-      msg: "Rooms created successfully"
+      msg: "Rooms created successfully",
+      count: result.count,
     });
 
   } catch (e) {
     console.log(e);
-    return res.status(500).json({ msg: "Internal server error" });
+    return res.status(500).json({
+      msg: "Internal server error",
+    });
   }
 };
 
 
-export const getAllRooms = async (req: Request, res: Response) =>{
-    try{
-        const hostelId = req.user?.hostelId;
-        const allRooms = await prisma.room.findMany({
-            where: {hostelId},
-            select: {
-                ...safeRoomSelector,
-                students: {
-                    select: {
-                        id: true,
-                        regNo: true
-                    }
-                }
-            }
-        })
-        return res.status(200).json(allRooms)
-    }
-    catch(e){
-        console.log(e);
-        return res.status(500).json({
-            msg: "Internal server error!!"
-        })
-    }
-}
+export const getAllRooms = async (req: Request, res: Response) => {
+  try {
+    const hostelId = req.user?.hostelId;
 
-export const getSingleRoom = async (req: Request, res: Response) =>{
-    try{
-        const hostelId = req.user?.hostelId;
-        const roomNo = req.params.roomNo;
-        const singleRoom = await prisma.room.findFirst({
-            where: {
-                hostelId,
-                number: roomNo
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 12;
+
+    const skip = (page - 1) * limit;
+
+    const total = await prisma.room.count({
+      where: { hostelId }
+    });
+
+    const rooms = await prisma.room.findMany({
+      where: { hostelId },
+      skip,
+      take: limit,
+      orderBy: {
+        number: "asc"
+      },
+      select: {
+        ...safeRoomSelector,
+        students: {
+          select: {
+            id: true,
+            regNo: true
+          }
+        }
+      }
+    });
+
+    return res.status(200).json({
+      rooms,
+      total,
+      page,
+      limit
+    });
+
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      msg: "Internal server error!!"
+    });
+  }
+};
+
+export const getSingleRoom = async (req: Request, res: Response) => {
+  try {
+    const hostelId = req.user?.hostelId;
+    const id = req.params.id;
+
+    const singleRoom = await prisma.room.findFirst({
+      where: {
+        id, 
+        hostelId,
+      },
+      select: {
+        ...safeRoomSelector,
+        students: {
+          select: {
+            id: true,
+            regNo: true,
+            user: { 
+              select: {
+                name: true,
+                email: true,
+              },
             },
-            select: {
-                ...safeRoomSelector,
-                students: {
-                    select: {
-                        id: true,
-                        regNo: true,
-                    }
-                }
-            }
-        })
-        return res.status(200).json(singleRoom);
+          },
+        },
+      },
+    });
+
+    if (!singleRoom) {
+      return res.status(404).json({
+        msg: "Room not found",
+      });
     }
-    catch(e){
-        console.log(e);
-        return res.status(500).json({
-            msg: "Internal server error!!"
-        })
-    }
-}
+    return res.status(200).json({
+      room: singleRoom,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      msg: "Internal server error!!",
+    });
+  }
+};
 
 export const updateRoom = async (req: Request, res: Response) =>{
     try{

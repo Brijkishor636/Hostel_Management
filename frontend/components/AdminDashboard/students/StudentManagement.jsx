@@ -1,12 +1,11 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Card from "../ui/Cards";
-import Badge from "../ui/Badge";
+import axios from "axios";
 import Button from "../ui/Button";
 import {
   Search,
   Filter,
-  MoreVertical,
   Plus,
   UserPlus,
   X as CloseIcon,
@@ -28,30 +27,37 @@ const StudentManagement = () => {
 
   const [debouncedSearch, setDebouncedSearch] = useState(search);
 
-useEffect(() => {
-  const timer = setTimeout(() => {
-    setDebouncedSearch(search);
-  }, 500);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
 
-  return () => clearTimeout(timer);
-}, [search]);
+    return () => clearTimeout(timer);
+  }, [search]);
 
-  const { students, total, loading } = useStudents({
+  const { students, total, loading, setRefresh } = useStudents({
     role,
     page,
     limit,
-    search : debouncedSearch,
+    search: debouncedSearch,
   });
 
   const clearSearch = () => setSearch("");
 
-  const getStatusColor = (status) => {
-    if (status === "Paid") return "bg-emerald-500/20 text-emerald-400";
-    if (status === "Pending") return "bg-yellow-500/20 text-yellow-400";
-    return "bg-red-500/20 text-red-400";
-  };
-
   const baseRoute = pathname.startsWith("/warden") ? "/warden" : "/admin";
+
+  const deleteStudent = async (id) => {
+  try {
+    await axios.delete(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/${role}/student/${id}`,
+      { withCredentials: true }
+    );
+    setRefresh((prev) => !prev);
+    
+  } catch (err) {
+    console.error("Error deleting student", err);
+  }
+};
 
   if (loading) return <p className="text-white p-6">Loading...</p>;
 
@@ -115,7 +121,7 @@ useEffect(() => {
             </div>
           </div>
 
-          {/* Buttons (RESTORED ✅) */}
+          {/* Buttons */}
           <div className="flex w-full lg:w-auto gap-2 md:gap-3">
             <button className="flex-1 md:flex-none flex items-center justify-center px-3 md:px-4 py-2 md:py-3 rounded-xl bg-white/5 border border-white/10 text-gray-300">
               <Filter size={16} />
@@ -156,9 +162,19 @@ useEffect(() => {
                   <td className="px-6 py-5">
                     {student.student?.regNo}
                   </td>
+
                   <td className="px-8 py-5 text-right">
-                    <MoreVertical size={20} />
+                    <button onClick={()=>{deleteStudent(student.id)}}
+                      className={`px-3 py-1 rounded-lg text-xs cursor-pointer ${
+                        student.isActive
+                          ? "bg-red-500/20 text-red-400"
+                          : "bg-emerald-500/20 text-emerald-400"
+                      }`}
+                    >
+                      {student.isActive ? "Inactive" : "Active"}
+                    </button>
                   </td>
+
                 </tr>
               ))}
             </tbody>

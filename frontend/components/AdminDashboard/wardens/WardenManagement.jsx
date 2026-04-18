@@ -6,7 +6,6 @@ import Button from "../ui/Button";
 import {
   Search,
   Filter,
-  MoreVertical,
   Plus,
   ShieldCheck,
   X as CloseIcon,
@@ -16,31 +15,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
-// const MOCK_WARDENS = [
-//   {
-//     id: "W1",
-//     name: "Rahul Sharma",
-//     email: "rahul@hostel.com",
-//     phone: "9876543210",
-//     assignedBlock: "Block A",
-//     status: "Active",
-//   },
-//   {
-//     id: "W2",
-//     name: "Amit Kumar",
-//     email: "amit@hostel.com",
-//     phone: "9123456780",
-//     assignedBlock: "Block B",
-//     status: "Inactive",
-//   },
-// ];
-
 const WardenManagement = () => {
   const [search, setSearch] = useState("");
-  const [wardens, setWardens] = useState([]); 
+  const [wardens, setWardens] = useState([]);
+
   const router = useRouter();
   const url = process.env.NEXT_PUBLIC_BACKEND_URL;
-
   const role = "admin";
 
   useEffect(() => {
@@ -49,13 +29,11 @@ const WardenManagement = () => {
         const res = await axios.get(`${url}/api/v1/${role}/wardens`, {
           withCredentials: true,
         });
-
-        setWardens(res?.data || []); 
+        setWardens(res?.data || []);
       } catch (error) {
         console.error("Error fetching wardens:", error);
       }
     }
-
     fetchWardens();
   }, [url, role]);
 
@@ -64,6 +42,20 @@ const WardenManagement = () => {
   );
 
   const clearSearch = () => setSearch("");
+
+  const deleteWarden = async (id) => {
+    try {
+      await axios.delete(
+        `${url}/api/v1/${role}/warden/${id}`,
+        { withCredentials: true }
+      );
+
+      setWardens((prev) => prev.filter((w) => w.id !== id));
+
+    } catch (err) {
+      console.error("Error deleting warden", err);
+    }
+  };
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e1b4b] text-white p-6 space-y-10">
@@ -75,7 +67,7 @@ const WardenManagement = () => {
             Warden Directory
           </h2>
           <p className="text-gray-400 text-sm mt-1">
-            Manage wardens, their assigned blocks, and availability.
+            Manage wardens and their availability.
           </p>
         </div>
 
@@ -93,7 +85,6 @@ const WardenManagement = () => {
 
           <div className="relative flex-1 w-full group">
             <Search className="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-
             <input
               type="text"
               placeholder="Search wardens..."
@@ -101,7 +92,6 @@ const WardenManagement = () => {
               onChange={(e) => setSearch(e.target.value)}
               className="w-full bg-transparent border border-white/10 rounded-xl py-2 md:py-3.5 pl-10 md:pl-12 pr-10 text-sm md:text-base focus:outline-none focus:ring-1 focus:ring-indigo-500/40 placeholder:text-gray-500"
             />
-
             <div className="absolute inset-y-0 right-2 md:right-4 flex items-center">
               <AnimatePresence>
                 {search && (
@@ -135,12 +125,12 @@ const WardenManagement = () => {
 
       <Card className="!p-0 overflow-hidden border-white/10 bg-white/5 backdrop-blur-md">
 
+        {/* Desktop Table */}
         <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-left text-sm">
             <thead className="bg-white/5 text-gray-400 text-[11px]">
               <tr>
                 <th className="px-8 py-5">Warden Info</th>
-                <th className="px-6 py-5">Block</th>
                 <th className="px-6 py-5">Email</th>
                 <th className="px-6 py-5">Phone</th>
                 <th className="px-6 py-5">Status</th>
@@ -152,26 +142,34 @@ const WardenManagement = () => {
               {filteredWardens.map((warden) => (
                 <tr key={warden.id}>
                   <td className="px-8 py-5">{warden.name}</td>
-                  <td className="px-6 py-5">{warden.assignedBlock}</td>
                   <td className="px-6 py-5">{warden.email}</td>
                   <td className="px-6 py-5">{warden.mobNo}</td>
                   <td className="px-6 py-5">
-                    <Badge variant={warden.status === "Active" ? "success" : "Active"}>
-                      {warden.status}
+                    <Badge variant={warden.isActive ? "success" : "destructive"}>
+                      {warden.isActive ? "Active" : "Inactive"}
                     </Badge>
                   </td>
+
                   <td className="px-8 py-5 text-right">
-                    <MoreVertical size={20} />
+                    <button
+                      onClick={() => deleteWarden(warden.id)}
+                      className="px-3 py-1 rounded-lg text-xs bg-red-500/20 text-red-400 hover:bg-red-500/30 cursor-pointer"
+                    >
+                      Delete
+                    </button>
                   </td>
+
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
+        {/* Mobile View */}
         <div className="md:hidden space-y-3 p-3">
           {filteredWardens.map((warden) => (
             <div key={warden.id} className="p-3 rounded-xl bg-white/5 border border-white/10">
+
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                   {warden.name.charAt(0)}
@@ -183,30 +181,28 @@ const WardenManagement = () => {
               </div>
 
               <div className="mt-3 text-sm space-y-2">
-                <p>Block: {warden.assignedBlock}</p>
                 <p className="truncate">Email: {warden.email}</p>
                 <p>Phone: {warden.mobNo}</p>
-                <Badge variant={warden.status === "Active" ? "success" : "Active"}>
-                  {warden.status}
+                <Badge variant={warden.isActive ? "success" : "destructive"}>
+                  {warden.isActive ? "Active" : "Inactive"}
                 </Badge>
+
+                <button
+                  onClick={() => deleteWarden(warden.id)}
+                  className="mt-2 px-3 py-1 rounded-lg text-xs bg-red-500/20 text-red-400 hover:bg-red-500/30 cursor-pointer"
+                >
+                  Delete
+                </button>
               </div>
             </div>
           ))}
+
         </div>
 
-        <div className="px-4 md:px-8 py-4 md:py-5 border-t border-white/10 flex flex-col sm:flex-row lg:flex-row items-center lg:items-center justify-between gap-4 text-xs text-gray-500 bg-white/5">
-          <p className="w-full text-left sm:w-auto lg:w-auto lg:flex lg:items-center lg:h-full">
+        <div className="px-4 md:px-8 py-4 md:py-5 border-t border-white/10 flex justify-between text-xs text-gray-500 bg-white/5">
+          <p>
             {filteredWardens.length} / {wardens.length}
           </p>
-
-          <div className="flex gap-2 w-full sm:w-auto lg:w-auto lg:items-center">
-            <button className="flex-1 sm:flex-none px-4 py-2 bg-white/5 rounded-lg">
-              Prev
-            </button>
-            <button className="flex-1 sm:flex-none px-4 py-2 bg-white/5 rounded-lg">
-              Next
-            </button>
-          </div>
         </div>
       </Card>
     </div>

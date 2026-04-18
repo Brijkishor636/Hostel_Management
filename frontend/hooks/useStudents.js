@@ -6,6 +6,7 @@ export const useStudents = ({ role, page, limit, search }) => {
   const [students, setStudents] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -31,7 +32,7 @@ export const useStudents = ({ role, page, limit, search }) => {
     };
 
     fetchStudents();
-  }, [role, page, limit, search]);
+  }, [role, page, limit, search, refresh]);
 
-  return { students, total, loading };
+  return { students, total, loading, setRefresh };
 };

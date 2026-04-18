@@ -15,8 +15,8 @@ export default function UserProvider({children}){
             const newUser = await axios.get(`${url}/api/v1/user/current`, {
                 withCredentials: true
             });
-            console.log(newUser);
-            // setUser(newUser.data.user);
+            // console.log(newUser);
+            setUser(newUser.data.user);
         } catch (error) {
             console.log(error);
             // toast.error("Error in fetching user");

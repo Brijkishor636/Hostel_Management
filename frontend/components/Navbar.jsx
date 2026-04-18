@@ -10,7 +10,8 @@ export default function Navbar() {
   const [profileOpen, setProfileOpen] = useState(false);
 
   const {user, setUser} = useContext(UserContext);
-
+  const userRole = user?.role;
+  const role = userRole?.toLowerCase();
   const handleLogout = async () => {
   try {
     await axios.post(
@@ -73,7 +74,7 @@ export default function Navbar() {
               {profileOpen && (
                 <div className="absolute right-0 mt-3 w-44 bg-white/90 backdrop-blur-md rounded-xl shadow-lg border border-white/20 overflow-hidden">
                   <Link
-                    href="#!"
+                    href={`/${role}/profile`}
                     className="block px-4 py-2 text-gray-600 hover:bg-white/20"
                   >
                     Profile
@@ -117,7 +118,7 @@ export default function Navbar() {
           ) : (
             <>
               <Link
-                href="#!"
+                href={`/${role}/profile`}
                 className="block text-gray-700 font-medium hover:text-purple-600"
                 onClick={() => setOpen(false)}
               >

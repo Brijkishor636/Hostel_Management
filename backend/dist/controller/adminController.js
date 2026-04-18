@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAdmins = exports.updateUser = exports.updateStudent = exports.deleteWarden = exports.deleteStudent = exports.getSingleWarden = exports.getwardens = exports.createWarden = exports.getSingleStudent = exports.getStudents = exports.createStudent = void 0;
+exports.getUnassignedStudents = exports.getAdmins = exports.updateUser = exports.updateStudent = exports.deleteWarden = exports.deleteStudent = exports.getSingleWarden = exports.getwardens = exports.createWarden = exports.getSingleStudent = exports.getStudents = exports.createStudent = void 0;
 const studentInput_1 = require("../inputs/studentInput");
 const client_1 = require("@prisma/client");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
@@ -452,3 +452,35 @@ const getAdmins = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getAdmins = getAdmins;
+const getUnassignedStudents = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
+        const unassignedStudents = yield prisma.student.findMany({
+            where: {
+                hostelId,
+                roomId: null,
+            },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        mobNo: true,
+                    },
+                },
+            },
+        });
+        return res.status(200).json({
+            students: unassignedStudents,
+        });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            msg: "Internal server error!",
+        });
+    }
+});
+exports.getUnassignedStudents = getUnassignedStudents;

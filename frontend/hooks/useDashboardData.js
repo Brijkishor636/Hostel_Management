@@ -28,7 +28,7 @@ export const useDashboardData = (role = "admin") => {
         const roomData = await roomRes.json();
 
         setStudents(studentData.students || []);
-        setRooms(roomData || []);
+        setRooms(roomData.rooms || []);
       } catch (err) {
         setError(err.message);
       } finally {

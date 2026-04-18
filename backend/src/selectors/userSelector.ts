@@ -4,5 +4,6 @@ export const safeUserSelect = {
   name: true,
   email: true,
   mobNo: true,
+  isActive: true,
   hostelId: true,
 };
