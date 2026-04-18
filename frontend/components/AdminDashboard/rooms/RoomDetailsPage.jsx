@@ -6,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import UserContext from "../../../context/UserContext";
 import { Users, BedDouble } from "lucide-react";
 import StatusDropdown from "./StatusDropdown";
+import { toast } from "react-toastify";
 
 const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -51,6 +52,23 @@ export default function RoomDetailsPage() {
     }
   };
 
+  const removeStudent = async (studentId) => {
+    try {
+      await axios.put(
+        `${url}/api/v1/${role}/rooms/remove-student/${studentId}`,
+        {},
+        { withCredentials: true }
+      );
+
+      toast.success("Student removed");
+      fetchRoom();
+    } catch (err) {
+      toast.error(
+        err.response?.data?.msg || "Something went wrong"
+      );
+    }
+  };
+
   if (!user) return <p className="text-white p-6 text-lg">Loading user...</p>;
   if (loading) return <p className="text-white p-6 text-lg">Loading room...</p>;
   if (!room) return <p className="text-red-500 p-6 text-lg">Room not found</p>;
@@ -72,14 +90,15 @@ export default function RoomDetailsPage() {
         </div>
 
         <div className="flex gap-3">
+          {room.status !== "FULL" && 
           <button
             onClick={() =>
               router.push(`/${role}/rooms/${room.id}/unassigned-students`)
             }
-            className="px-5 py-2.5 cursor-pointer rounded-xl bg-indigo-500 hover:bg-indigo-700 text-base font-medium"
+            className="px-5 py-2 cursor-pointer rounded-xl bg-indigo-500 hover:bg-indigo-700 text-base"
           >
             Assign Student
-          </button>
+          </button>}
 
           <StatusDropdown value={room.status} onChange={changeStatus} />
         </div>
@@ -125,7 +144,7 @@ export default function RoomDetailsPage() {
         </h2>
 
         {room.students.length === 0 ? (
-          <div className="bg-white/5 border border-white/10 p-6 rounded-xl text-center text-gray-400 text-base">
+          <div className="bg-white/5 border border-white/10 p-4 rounded-xl text-center text-gray-400 text-base">
             No students assigned
           </div>
         ) : (
@@ -133,8 +152,15 @@ export default function RoomDetailsPage() {
             {room.students.map((student) => (
               <div
                 key={student.id}
-                className="bg-white/5 border border-white/10 p-5 rounded-xl"
+                className="relative bg-white/5 border border-white/10 p-6 rounded-xl pr-20 min-h-[140px]"
               >
+                <button
+                  onClick={() => removeStudent(student.id)}
+                  className="absolute cursor-pointer top-3 right-3 px-3 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-xs transition"
+                >
+                  Remove
+                </button>
+
                 <p className="text-lg font-semibold text-white">
                   {student.user.name}
                 </p>

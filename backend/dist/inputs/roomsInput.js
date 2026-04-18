@@ -16,6 +16,5 @@ exports.createRoomsInput = zod_1.default.object({
     })).min(1)
 });
 exports.updateRoomInput = zod_1.default.object({
-    roomNo: zod_1.default.string().optional(),
-    capacity: zod_1.default.number().int().positive().optional()
+    capacity: zod_1.default.number().int().positive(),
 });

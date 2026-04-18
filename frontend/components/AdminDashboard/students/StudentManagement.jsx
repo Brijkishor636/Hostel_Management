@@ -31,7 +31,6 @@ const StudentManagement = () => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
     }, 500);
-
     return () => clearTimeout(timer);
   }, [search]);
 
@@ -47,17 +46,16 @@ const StudentManagement = () => {
   const baseRoute = pathname.startsWith("/warden") ? "/warden" : "/admin";
 
   const deleteStudent = async (id) => {
-  try {
-    await axios.delete(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/${role}/student/${id}`,
-      { withCredentials: true }
-    );
-    setRefresh((prev) => !prev);
-    
-  } catch (err) {
-    console.error("Error deleting student", err);
-  }
-};
+    try {
+      await axios.delete(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/${role}/student/${id}`,
+        { withCredentials: true }
+      );
+      setRefresh((prev) => !prev);
+    } catch (err) {
+      console.error("Error deleting student", err);
+    }
+  };
 
   if (loading) return <p className="text-white p-6">Loading...</p>;
 
@@ -76,20 +74,30 @@ const StudentManagement = () => {
           </p>
         </div>
 
-        <Button
-          onClick={() => router.push(`${baseRoute}/students/create`)}
-          size="lg"
-          className="shadow-indigo-500/20 cursor-pointer"
-        >
-          <Plus size={20} /> Add New Student
-        </Button>
+        <div className="flex flex-col lg:flex-row gap-4">
+          <Button
+            onClick={() =>
+              router.push(`${baseRoute}/students/inactive-students`)
+            }
+            className="cursor-pointer"
+          >
+            Inactive Students
+          </Button>
+
+          <Button
+            onClick={() => router.push(`${baseRoute}/students/create`)}
+            size="lg"
+            className="shadow-indigo-500/20 cursor-pointer"
+          >
+            <Plus size={20} /> Add New Student
+          </Button>
+        </div>
       </div>
 
-      {/* Search + Buttons */}
+      {/* Search */}
       <div className="flex flex-col lg:flex-row items-center gap-4 p-[1px] rounded-2xl bg-gradient-to-r from-indigo-500/20 via-purple-300/20 to-indigo-500/20">
         <div className="flex flex-col lg:flex-row items-center gap-4 w-full bg-white/5 backdrop-blur-xl rounded-2xl border border-white/10 p-2">
 
-          {/* Search */}
           <div className="relative flex-1 w-full group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
 
@@ -121,24 +129,22 @@ const StudentManagement = () => {
             </div>
           </div>
 
-          {/* Buttons */}
           <div className="flex w-full lg:w-auto gap-2 md:gap-3">
             <button className="flex-1 md:flex-none flex items-center justify-center px-3 md:px-4 py-2 md:py-3 rounded-xl bg-white/5 border border-white/10 text-gray-300">
               <Filter size={16} />
-              <span className="hidden lg:inline ml-2">Filters</span>
             </button>
 
             <button className="flex-1 md:flex-none flex items-center justify-center px-3 md:px-4 py-2 md:py-3 rounded-xl bg-gradient-to-r from-indigo-400 to-gray-400 text-white">
               <Download size={16} />
-              <span className="hidden lg:inline ml-2">Export CSV</span>
             </button>
           </div>
-
         </div>
       </div>
 
-      {/* Table */}
+      {/* Table + Mobile Cards */}
       <Card className="!p-0 overflow-hidden border-white/10 bg-white/5 backdrop-blur-md">
+
+        {/* Desktop */}
         <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-left text-sm">
             <thead className="bg-white/5 text-gray-400 text-[11px]">
@@ -164,7 +170,8 @@ const StudentManagement = () => {
                   </td>
 
                   <td className="px-8 py-5 text-right">
-                    <button onClick={()=>{deleteStudent(student.id)}}
+                    <button
+                      onClick={() => deleteStudent(student.id)}
                       className={`px-3 py-1 rounded-lg text-xs cursor-pointer ${
                         student.isActive
                           ? "bg-red-500/20 text-red-400"
@@ -174,11 +181,39 @@ const StudentManagement = () => {
                       {student.isActive ? "Inactive" : "Active"}
                     </button>
                   </td>
-
                 </tr>
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile */}
+        <div className="md:hidden flex flex-col divide-y divide-white/5">
+          {students.map((student) => (
+            <div key={student.id} className="p-4 space-y-2">
+              <p className="font-semibold">{student.name}</p>
+              <p className="text-sm text-gray-400">{student.email}</p>
+              <p className="text-sm text-gray-400">
+                Room: {student.student?.room?.number || "N/A"}
+              </p>
+              <p className="text-sm text-gray-400">
+                Reg No: {student.student?.regNo}
+              </p>
+
+              <div className="flex justify-end pt-2">
+                <button
+                  onClick={() => deleteStudent(student.id)}
+                  className={`px-4 py-2 rounded-lg text-sm ${
+                    student.isActive
+                      ? "bg-red-500/20 text-red-400"
+                      : "bg-emerald-500/20 text-emerald-400"
+                  }`}
+                >
+                  {student.isActive ? "Inactive" : "Active"}
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* Footer */}
@@ -202,6 +237,7 @@ const StudentManagement = () => {
             </button>
           </div>
         </div>
+
       </Card>
     </div>
   );

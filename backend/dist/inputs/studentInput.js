@@ -17,5 +17,5 @@ exports.updateStudentSchema = zod_1.default.object({
     mobNo: zod_1.default.string().optional(),
     regNo: zod_1.default.string().optional(),
     isActive: zod_1.default.boolean().optional(),
-    roomNo: zod_1.default.string().min(3).optional()
+    roomNo: zod_1.default.string().min(1).optional()
 });
