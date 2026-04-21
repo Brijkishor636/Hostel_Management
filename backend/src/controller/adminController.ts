@@ -522,6 +522,9 @@ export const getUnassignedStudents = async (req: Request, res: Response) => {
       where: {
         hostelId,
         roomId: null,
+        user: {
+          isActive: true
+        }
       },
       include: {
         user: {
@@ -603,3 +606,39 @@ export const getInactiveStudents = async (req: Request, res: Response) => {
   }
 };
 
+
+export const getInactiveWardens = async (req: Request, res: Response) => {
+  try {
+    const hostelId = req.user?.hostelId;
+
+    if (!hostelId) {
+      return res.status(400).json({ msg: "Hostel ID missing" });
+    }
+
+    const wardens = await prisma.user.findMany({
+      where: {
+        hostelId,
+        role: "WARDEN",
+        isActive: false,
+      },
+      select: {
+        ...safeUserSelect,
+        hostel: {
+          select: {
+            name: true,
+          },
+        },
+      },
+      orderBy: {
+        name: "asc",
+      },
+    });
+
+    return res.status(200).json({ wardens });
+
+  } catch (e) {
+    return res.status(500).json({
+      msg: "Internal Server error!!",
+    });
+  }
+};

@@ -71,13 +71,24 @@ const WardenManagement = () => {
           </p>
         </div>
 
-        <Button
-          onClick={() => router.push("/admin/wardens/create")}
-          size="lg"
-          className="shadow-indigo-500/20 cursor-pointer"
-        >
-          <Plus size={20} /> Add New Warden
-        </Button>
+        <div className="flex flex-col lg:flex-row gap-4">
+          <Button
+            onClick={() =>
+              router.push(`wardens/inactive-wardens`)
+            }
+            className="cursor-pointer"
+          >
+            Inactive Wardens
+          </Button>
+
+          <Button
+            onClick={() => router.push(`/admin/wardens/create`)}
+            size="lg"
+            className="shadow-indigo-500/20 cursor-pointer"
+          >
+            <Plus size={20} /> Add New Warden
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row items-center gap-4 p-[1px] rounded-2xl bg-gradient-to-r from-indigo-500/20 via-purple-300/20 to-indigo-500/20">

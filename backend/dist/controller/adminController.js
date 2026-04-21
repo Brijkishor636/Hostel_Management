@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getInactiveStudents = exports.getUnassignedStudents = exports.getAdmins = exports.updateUser = exports.updateStudent = exports.deleteWarden = exports.deleteStudent = exports.getSingleWarden = exports.getwardens = exports.createWarden = exports.getSingleStudent = exports.getStudents = exports.createStudent = void 0;
+exports.getInactiveWardens = exports.getInactiveStudents = exports.getUnassignedStudents = exports.getAdmins = exports.updateUser = exports.updateStudent = exports.deleteWarden = exports.deleteStudent = exports.getSingleWarden = exports.getwardens = exports.createWarden = exports.getSingleStudent = exports.getStudents = exports.createStudent = void 0;
 const studentInput_1 = require("../inputs/studentInput");
 const client_1 = require("@prisma/client");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
@@ -497,6 +497,9 @@ const getUnassignedStudents = (req, res) => __awaiter(void 0, void 0, void 0, fu
             where: {
                 hostelId,
                 roomId: null,
+                user: {
+                    isActive: true
+                }
             },
             include: {
                 user: {
@@ -569,3 +572,35 @@ const getInactiveStudents = (req, res) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.getInactiveStudents = getInactiveStudents;
+const getInactiveWardens = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
+        const wardens = yield prisma.user.findMany({
+            where: {
+                hostelId,
+                role: "WARDEN",
+                isActive: false
+            },
+            select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { student: {
+                    select: {
+                        id: true,
+                        regNo: true,
+                    },
+                }, hostel: {
+                    select: {
+                        name: true,
+                    },
+                } }),
+        });
+        return res.status(200).json({
+            wardens
+        });
+    }
+    catch (e) {
+        return res.status(500).json({
+            msg: "Internal Server error!!"
+        });
+    }
+});
+exports.getInactiveWardens = getInactiveWardens;

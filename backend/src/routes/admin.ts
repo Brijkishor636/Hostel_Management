@@ -1,11 +1,12 @@
 import express, {Request, Response} from "express";
 import { verifyToken } from "../middlewares/authMiddleware";
 import { authorizeRole } from "../middlewares/roleMiddleware";
-import { createStudent, createWarden, deleteStudent, deleteWarden, getAdmins, getInactiveStudents, getSingleStudent, getSingleWarden, getStudents, getUnassignedStudents, getwardens, updateStudent, updateUser} from "../controller/adminController";
+import { createStudent, createWarden, deleteStudent, deleteWarden, getAdmins, getInactiveStudents, getInactiveWardens, getSingleStudent, getSingleWarden, getStudents, getUnassignedStudents, getwardens, updateStudent, updateUser} from "../controller/adminController";
 import { getSelfDetails, updateSelfProfile } from "../controller/userController";
 import { allocateRoom, createRooms, deleteRoom, getAllRooms, getSingleRoom, updateRoom } from "../controller/roomController";
 import { createCharge, generatePayments, getCharges } from "../controller/paymentController";
 import { inactiveStudent, removeStudent } from "../controller/admin/studentController";
+import { inactiveWarden } from "../controller/admin/wardenController";
 
 const adminRouter = express.Router();
 
@@ -17,6 +18,7 @@ adminRouter.post("/create-student", (req: Request, res: Response) => createStude
 adminRouter.get("/students", (req: Request, res: Response) => getStudents(req, res));
 
 adminRouter.get("/inactive-students", (req: Request, res: Response) => getInactiveStudents(req, res));
+adminRouter.get("/inactive-wardens", (req: Request, res: Response) => getInactiveWardens(req, res));
 
 adminRouter.get("/student/:id", (req: Request, res: Response) => getSingleStudent(req, res));
 
@@ -32,6 +34,7 @@ adminRouter.delete("/warden/:id", (req: Request, res: Response) => deleteWarden(
 
 adminRouter.put("/student/:id", (req: Request, res: Response) => updateStudent(req, res));
 adminRouter.put("/inactive/:id", (req: Request, res: Response) => inactiveStudent(req, res));
+adminRouter.put("/inactive-warden/:id", (req: Request, res: Response) => inactiveWarden(req, res));
 
 adminRouter.put("/user/:id", (req: Request, res: Response) => updateUser(req, res));
 
@@ -59,6 +62,7 @@ adminRouter.put("/rooms/remove-student/:studentId", (req: Request, res: Response
 );
 
 adminRouter.get("/unassigned-student", (req: Request, res: Response) => getUnassignedStudents(req, res));
+
 
 adminRouter.post("/charges", createCharge);            
 adminRouter.get("/charges", getCharges);                 
