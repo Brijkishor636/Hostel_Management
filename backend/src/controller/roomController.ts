@@ -118,7 +118,7 @@ export const createRooms = async (req: Request, res: Response) => {
 };
 
 
-export const getAllRooms = async (req: Request, res: Response) => {
+export const getRooms = async (req: Request, res: Response) => {
   try {
     const hostelId = req.user?.hostelId;
 
@@ -288,6 +288,40 @@ export const deleteRoom = async (req: Request, res: Response) => {
     return res.status(200).json({
       msg: "Room deleted successfully..",
     });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      msg: "Internal server error!!",
+    });
+  }
+};
+
+
+
+export const getAllRooms = async (req: Request, res: Response) => {
+  try {
+    const hostelId = req.user?.hostelId;
+
+    const rooms = await prisma.room.findMany({
+      where: { hostelId },
+      orderBy: {
+        number: "asc",
+      },
+      select: {
+        ...safeRoomSelector,
+        students: {
+          select: {
+            id: true,
+            regNo: true,
+          },
+        },
+      },
+    });
+
+    return res.status(200).json({
+      rooms
+    });
+
   } catch (e) {
     console.log(e);
     return res.status(500).json({

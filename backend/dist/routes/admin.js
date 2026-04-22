@@ -34,7 +34,7 @@ adminRouter.get("/me", (req, res) => (0, userController_1.getSelfDetails)(req, r
 adminRouter.put("/update-selfprofile", (req, res) => (0, userController_1.updateSelfProfile)(req, res));
 adminRouter.post("/rooms/allocate", (req, res) => (0, roomController_1.allocateRoom)(req, res));
 adminRouter.post("/rooms/create", (req, res) => (0, roomController_1.createRooms)(req, res));
-adminRouter.get("/rooms", (req, res) => (0, roomController_1.getAllRooms)(req, res));
+adminRouter.get("/rooms", (req, res) => (0, roomController_1.getRooms)(req, res));
 adminRouter.get("/rooms/:id", (req, res) => (0, roomController_1.getSingleRoom)(req, res));
 adminRouter.put("/rooms/update/:id", (req, res) => (0, roomController_1.updateRoom)(req, res));
 adminRouter.delete("/rooms/:id", (req, res) => (0, roomController_1.deleteRoom)(req, res));
@@ -43,4 +43,7 @@ adminRouter.get("/unassigned-student", (req, res) => (0, adminController_1.getUn
 adminRouter.post("/charges", paymentController_1.createCharge);
 adminRouter.get("/charges", paymentController_1.getCharges);
 adminRouter.post("/payments/generate", paymentController_1.generatePayments);
+// For dashboard-data
+adminRouter.get("/allstudents", (req, res) => (0, studentController_1.getAllStudents)(req, res));
+adminRouter.get("/allrooms", (req, res) => (0, roomController_1.getAllRooms)(req, res));
 exports.default = adminRouter;

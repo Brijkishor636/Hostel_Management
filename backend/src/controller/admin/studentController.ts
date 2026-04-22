@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
+import { safeUserSelect } from "../../selectors/userSelector";
 
 const prisma = new PrismaClient();
 
@@ -107,6 +108,51 @@ export const removeStudent = async (req: Request, res: Response) => {
     console.log(e);
     return res.status(500).json({
       msg: "Internal server error",
+    });
+  }
+};
+
+
+export const getAllStudents = async (req: Request, res: Response) => {
+  try {
+    const hostelId = req.user?.hostelId;
+
+    const students = await prisma.user.findMany({
+      where: {
+        hostelId: hostelId,
+        role: "STUDENT",
+        isActive: true,
+      },
+      select: {
+        ...safeUserSelect,
+        student: {
+          select: {
+            id: true,
+            regNo: true,
+            room: {
+              select: {
+                id: true,
+                number: true,
+              },
+            },
+          },
+        },
+        hostel: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+
+    return res.status(200).json({
+      students,
+      total: students.length,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      msg: "Internal server error!!",
     });
   }
 };

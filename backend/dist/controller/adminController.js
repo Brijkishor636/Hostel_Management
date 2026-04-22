@@ -576,30 +576,29 @@ const getInactiveWardens = (req, res) => __awaiter(void 0, void 0, void 0, funct
     var _a;
     try {
         const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
+        if (!hostelId) {
+            return res.status(400).json({ msg: "Hostel ID missing" });
+        }
         const wardens = yield prisma.user.findMany({
             where: {
                 hostelId,
                 role: "WARDEN",
-                isActive: false
+                isActive: false,
             },
-            select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { student: {
-                    select: {
-                        id: true,
-                        regNo: true,
-                    },
-                }, hostel: {
+            select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { hostel: {
                     select: {
                         name: true,
                     },
                 } }),
+            orderBy: {
+                name: "asc",
+            },
         });
-        return res.status(200).json({
-            wardens
-        });
+        return res.status(200).json({ wardens });
     }
     catch (e) {
         return res.status(500).json({
-            msg: "Internal Server error!!"
+            msg: "Internal Server error!!",
         });
     }
 });

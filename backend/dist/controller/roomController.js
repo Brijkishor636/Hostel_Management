@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteRoom = exports.updateRoom = exports.getSingleRoom = exports.getAllRooms = exports.createRooms = exports.allocateRoom = void 0;
+exports.getAllRooms = exports.deleteRoom = exports.updateRoom = exports.getSingleRoom = exports.getRooms = exports.createRooms = exports.allocateRoom = void 0;
 const roomsInput_1 = require("../inputs/roomsInput");
 const client_1 = require("@prisma/client");
 const roomSelector_1 = require("../selectors/roomSelector");
@@ -113,7 +113,7 @@ const createRooms = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.createRooms = createRooms;
-const getAllRooms = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getRooms = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
         const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
@@ -151,7 +151,7 @@ const getAllRooms = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         });
     }
 });
-exports.getAllRooms = getAllRooms;
+exports.getRooms = getRooms;
 const getSingleRoom = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
     try {
@@ -275,3 +275,31 @@ const deleteRoom = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.deleteRoom = deleteRoom;
+const getAllRooms = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
+        const rooms = yield prisma.room.findMany({
+            where: { hostelId },
+            orderBy: {
+                number: "asc",
+            },
+            select: Object.assign(Object.assign({}, roomSelector_1.safeRoomSelector), { students: {
+                    select: {
+                        id: true,
+                        regNo: true,
+                    },
+                } }),
+        });
+        return res.status(200).json({
+            rooms
+        });
+    }
+    catch (e) {
+        console.log(e);
+        return res.status(500).json({
+            msg: "Internal server error!!",
+        });
+    }
+});
+exports.getAllRooms = getAllRooms;

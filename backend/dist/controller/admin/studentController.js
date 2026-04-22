@@ -9,8 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeStudent = exports.inactiveStudent = void 0;
+exports.getAllStudents = exports.removeStudent = exports.inactiveStudent = void 0;
 const client_1 = require("@prisma/client");
+const userSelector_1 = require("../../selectors/userSelector");
 const prisma = new client_1.PrismaClient();
 const inactiveStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -108,3 +109,43 @@ const removeStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.removeStudent = removeStudent;
+const getAllStudents = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
+        const students = yield prisma.user.findMany({
+            where: {
+                hostelId: hostelId,
+                role: "STUDENT",
+                isActive: true,
+            },
+            select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { student: {
+                    select: {
+                        id: true,
+                        regNo: true,
+                        room: {
+                            select: {
+                                id: true,
+                                number: true,
+                            },
+                        },
+                    },
+                }, hostel: {
+                    select: {
+                        name: true,
+                    },
+                } }),
+        });
+        return res.status(200).json({
+            students,
+            total: students.length,
+        });
+    }
+    catch (e) {
+        console.log(e);
+        return res.status(500).json({
+            msg: "Internal server error!!",
+        });
+    }
+});
+exports.getAllStudents = getAllStudents;

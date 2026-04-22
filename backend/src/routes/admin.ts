@@ -3,9 +3,9 @@ import { verifyToken } from "../middlewares/authMiddleware";
 import { authorizeRole } from "../middlewares/roleMiddleware";
 import { createStudent, createWarden, deleteStudent, deleteWarden, getAdmins, getInactiveStudents, getInactiveWardens, getSingleStudent, getSingleWarden, getStudents, getUnassignedStudents, getwardens, updateStudent, updateUser} from "../controller/adminController";
 import { getSelfDetails, updateSelfProfile } from "../controller/userController";
-import { allocateRoom, createRooms, deleteRoom, getAllRooms, getSingleRoom, updateRoom } from "../controller/roomController";
+import { allocateRoom, createRooms, deleteRoom, getAllRooms, getRooms, getSingleRoom, updateRoom } from "../controller/roomController";
 import { createCharge, generatePayments, getCharges } from "../controller/paymentController";
-import { inactiveStudent, removeStudent } from "../controller/admin/studentController";
+import { getAllStudents, inactiveStudent, removeStudent } from "../controller/admin/studentController";
 import { inactiveWarden } from "../controller/admin/wardenController";
 
 const adminRouter = express.Router();
@@ -48,7 +48,7 @@ adminRouter.post("/rooms/allocate", (req: Request, res: Response) => allocateRoo
 
 adminRouter.post("/rooms/create", (req: Request, res: Response) => createRooms(req, res));
 
-adminRouter.get("/rooms", (req: Request, res: Response) => getAllRooms(req, res));
+adminRouter.get("/rooms", (req: Request, res: Response) => getRooms(req, res));
 
 adminRouter.get("/rooms/:id", (req: Request, res: Response) => getSingleRoom(req, res));
 
@@ -67,5 +67,11 @@ adminRouter.get("/unassigned-student", (req: Request, res: Response) => getUnass
 adminRouter.post("/charges", createCharge);            
 adminRouter.get("/charges", getCharges);                 
 adminRouter.post("/payments/generate", generatePayments); 
+
+
+
+// For dashboard-data
+adminRouter.get("/allstudents", (req: Request, res: Response) => getAllStudents(req, res));
+adminRouter.get("/allrooms", (req: Request, res: Response) => getAllRooms(req, res));
 
 export default adminRouter;

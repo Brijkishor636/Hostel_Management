@@ -75,6 +75,13 @@ export const currentUser = async(req: Request, res: Response) =>{
   const user = await prisma.user.findFirst({
     where: {
       id: data.userId
+    },select:{
+      ...safeUserSelect,
+      hostel: {
+        select: {
+          name: true
+        }
+      }
     }
   })
   if (!user) {
@@ -82,9 +89,8 @@ export const currentUser = async(req: Request, res: Response) =>{
         msg: "User not found",
       });
     }
-    const { password, ...userWithoutPassword } = user;
     return res.status(200).json({
-      user: userWithoutPassword,
+      user,
     });
   }
    catch (error) {

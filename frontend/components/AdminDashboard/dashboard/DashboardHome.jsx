@@ -1,11 +1,13 @@
 "use client";
-import React from "react";
+import React, { useContext } from "react";
 import Card from "../ui/Cards";
 import Badge from "../ui/Badge";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { Users, DoorOpen, DollarSign, AlertCircle, ArrowUpRight, Activity } from "lucide-react";
 import { MOCK_COMPLAINTS } from "../../constants";
 import { useDashboardData } from "../../../hooks/useDashboardData";
+import Link from "next/link";
+import UserContext from "../../../context/UserContext";
 
 const chartData = [
   { name: "Jan", revenue: 4000 },
@@ -23,17 +25,21 @@ const colorMap = {
   rose: "bg-rose-500/10 text-rose-400",
 };
 
-const StatCard = ({ title, value, icon, trend, color }) => (
-  <Card className="flex flex-col gap-4 bg-white/5 backdrop-blur-md border border-white/10 hover:shadow-[0_0_35px_rgba(99,102,241,0.25)] transition duration-300">
-    <div className="flex items-center justify-between">
-      <div className={`p-3 rounded-xl ${colorMap[color]}`}>{icon}</div>
-      <div className="flex items-center gap-1 text-emerald-400 text-sm font-medium">{trend} <ArrowUpRight size={14} /></div>
-    </div>
-    <div>
-      <p className="text-gray-400 text-sm font-medium">{title}</p>
-      <h3 className="text-2xl font-bold mt-1 text-white">{value}</h3>
-    </div>
-  </Card>
+const StatCard = ({ title, value, icon, trend, color, link }) => (
+  <Link href={link}>
+    <Card className="flex flex-col gap-4 cursor-pointer bg-white/5 backdrop-blur-md border border-white/10 hover:shadow-[0_0_25px_rgba(99,102,241,0.25)] transition duration-300 cursor-pointer">
+      <div className="flex items-center justify-between">
+        <div className={`p-3 rounded-xl ${colorMap[color]}`}>{icon}</div>
+        <div className="flex items-center gap-1 text-emerald-400 text-sm font-medium">
+          {trend} <ArrowUpRight size={14} />
+        </div>
+      </div>
+      <div>
+        <p className="text-gray-400 text-sm font-medium">{title}</p>
+        <h3 className="text-2xl font-bold mt-1 text-white">{value}</h3>
+      </div>
+    </Card>
+  </Link>
 );
 
 const url = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -50,14 +56,16 @@ const DashboardHome = () => {
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
+  const { user } = useContext(UserContext);
+  const role = user?.role?.toLowerCase();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e1b4b] text-white p-6 space-y-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-        <StatCard title="Total Students" value={totalStudents} icon={<Users size={24} />} trend="+12%" color="violet" />
-        <StatCard title="Occupied Rooms" value={`${occupiedRooms}/${totalRooms}`} icon={<DoorOpen size={24} />} trend="+5%" color="blue" />
-        <StatCard title="Total Revenue" value="$42,390" icon={<DollarSign size={24} />} trend="+18%" color="emerald" />
-        <StatCard title="Open Complaints" value="12" icon={<AlertCircle size={24} />} trend="-2%" color="rose" />
+        <StatCard link={`${role}/students`} title="Total Students" value={totalStudents} icon={<Users size={24} />} trend="+12%" color="violet" />
+        <StatCard link={`${role}/rooms`} title="Occupied Rooms" value={`${occupiedRooms}/${totalRooms}`} icon={<DoorOpen size={24} />} trend="+5%" color="blue" />
+        <StatCard link={`${role}/payments`} title="Total Revenue" value="$42,390" icon={<DollarSign size={24} />} trend="+18%" color="emerald" />
+        <StatCard link={`${role}/complaints`} title="Open Complaints" value="12" icon={<AlertCircle size={24} />} trend="-2%" color="rose" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
