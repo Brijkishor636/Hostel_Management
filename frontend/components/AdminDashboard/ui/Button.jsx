@@ -28,7 +28,7 @@ export default function Button({
   return (
     <motion.button
       whileTap={{ scale: 0.98 }} onClick={onClick}
-      className={`rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+      className={`rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${
         variants[variant]
       } ${sizes[size]} ${className}`}
       {...props}

@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams, useRouter } from "next/navigation";
-import UserContext from "../../../context/UserContext";
+import { useParams, useRouter, usePathname } from "next/navigation";
 import { Users, BedDouble } from "lucide-react";
 import StatusDropdown from "./StatusDropdown";
 import { toast } from "react-toastify";
@@ -12,13 +11,12 @@ const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function RoomDetailsPage() {
   const { id } = useParams();
-  const { user } = useContext(UserContext);
+  const pathname = usePathname();
+  const role = pathname.split("/")[1];
 
   const [room, setRoom] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
-
-  const role = user?.role?.toLowerCase();
 
   useEffect(() => {
     if (!id || !role) return;
@@ -69,7 +67,7 @@ export default function RoomDetailsPage() {
     }
   };
 
-  if (!user) return <p className="text-white p-6 text-lg">Loading user...</p>;
+  if (!role) return <p className="text-white p-6 text-lg">Loading...</p>;
   if (loading) return <p className="text-white p-6 text-lg">Loading room...</p>;
   if (!room) return <p className="text-red-500 p-6 text-lg">Room not found</p>;
 
@@ -156,7 +154,7 @@ export default function RoomDetailsPage() {
               >
                 <button
                   onClick={() => removeStudent(student.id)}
-                  className="absolute cursor-pointer top-3 right-3 px-3 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-xs transition"
+                  className="absolute cursor-pointer top-2 right-2 px-3 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-white text-xs transition"
                 >
                   Remove
                 </button>

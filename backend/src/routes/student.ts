@@ -7,7 +7,7 @@ import { getMyPayments, payPayment } from "../controller/studentPaymentControlle
 const studentRouter = express.Router();
 
 studentRouter.use(verifyToken);
-studentRouter.use(authorizeRole("STUDENT"));
+studentRouter.use(authorizeRole("ADMIN", "WARDEN", "STUDENT"));
 
 studentRouter.get("/me", (req: Request, res: Response) => getSelfDetails(req, res));
 

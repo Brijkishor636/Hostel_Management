@@ -30,7 +30,7 @@
     "**/*.mts",
     "**/*.ts",
     "**/*.tsx"
-, "app/admin/rooms/[id]/page.jsx"  ],
+, "app/admin/rooms/[id]/page.jsx", "app/admin/wardens/page.jsx"  ],
   "exclude": [
     "node_modules"
   ]

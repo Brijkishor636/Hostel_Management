@@ -11,15 +11,11 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from "recharts";
-import {
-  Users,
-  BedDouble,
-  ClipboardList,
-  AlertCircle,
-  ArrowUpRight,
-  Activity,
-} from "lucide-react";
+import { AlertCircle, Activity } from "lucide-react";
 import { MOCK_COMPLAINTS } from "../constants";
+import { usePathname } from "next/navigation";
+import { useDashboardData } from "../../hooks/useDashboardData";
+import StatCardWrapper from "./common/StatCardWrapper"
 
 const chartData = [
   { name: "Mon", checkins: 60 },
@@ -30,71 +26,34 @@ const chartData = [
   { name: "Sat", checkins: 64 },
 ];
 
-const colorMap = {
-  violet: "bg-violet-500/10 text-violet-400",
-  blue: "bg-blue-500/10 text-blue-400",
-  emerald: "bg-emerald-500/10 text-emerald-400",
-  rose: "bg-rose-500/10 text-rose-400",
-};
-
-const StatCard = ({ title, value, icon, trend, color }) => (
-  <Card className="flex flex-col gap-4 bg-white/5 backdrop-blur-md border border-white/10 hover:shadow-[0_0_35px_rgba(99,102,241,0.25)] transition duration-300">
-    <div className="flex items-center justify-between">
-      <div className={`p-3 rounded-xl ${colorMap[color]}`}>{icon}</div>
-      <div className="flex items-center gap-1 text-emerald-400 text-sm font-medium">
-        {trend} <ArrowUpRight size={14} />
-      </div>
-    </div>
-    <div>
-      <p className="text-gray-400 text-sm font-medium">{title}</p>
-      <h3 className="text-2xl font-bold mt-1 text-white">{value}</h3>
-    </div>
-  </Card>
-);
-
 const WardenDashboard = () => {
+  const pathname = usePathname();
+  const role = pathname.split("/")[1];
+
+  const {
+    totalStudents,
+    totalRooms,
+    occupiedRooms,
+    loading,
+  } = useDashboardData(role);
+
+  if (!role || loading) {
+    return <p className="text-white p-6">Loading...</p>;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e1b4b] text-white p-6 space-y-8">
-      
-      {/* Stats */}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
-        <StatCard
-          title="Total Students"
-          value="152"
-          icon={<Users size={24} />}
-          trend="+4%"
-          color="violet"
-        />
-
-        <StatCard
-          title="Rooms Occupied"
-          value="78 / 90"
-          icon={<BedDouble size={24} />}
-          trend="+2%"
-          color="blue"
-        />
-
-        <StatCard
-          title="Pending Complaints"
-          value="7"
-          icon={<AlertCircle size={24} />}
-          trend="-1%"
-          color="rose"
-        />
-
-        <StatCard
-          title="Attendance Today"
-          value="143 Present"
-          icon={<ClipboardList size={24} />}
-          trend="+3%"
-          color="emerald"
+        <StatCardWrapper
+          totalStudents={totalStudents}
+          totalRooms={totalRooms}
+          occupiedRooms={occupiedRooms}
         />
       </div>
 
-      {/* Charts + Complaints */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
-        {/* Attendance Chart */}
+
         <Card className="lg:col-span-2 bg-white/5 backdrop-blur-md border border-white/10 hover:shadow-[0_0_35px_rgba(99,102,241,0.25)] transition duration-300">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
             <h3 className="text-lg font-semibold flex items-center gap-2 text-white">
@@ -108,7 +67,7 @@ const WardenDashboard = () => {
             </select>
           </div>
 
-          <div className="h-[280px] sm:h-[320px] w-full">
+          <div className="h-[300px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData}>
                 <defs>
@@ -118,24 +77,9 @@ const WardenDashboard = () => {
                   </linearGradient>
                 </defs>
 
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="#1f2937"
-                  vertical={false}
-                />
-
-                <XAxis
-                  dataKey="name"
-                  stroke="#9ca3af"
-                  axisLine={false}
-                  tickLine={false}
-                />
-
-                <YAxis
-                  stroke="#9ca3af"
-                  axisLine={false}
-                  tickLine={false}
-                />
+                <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
+                <XAxis dataKey="name" stroke="#9ca3af" axisLine={false} tickLine={false} />
+                <YAxis stroke="#9ca3af" axisLine={false} tickLine={false} />
 
                 <Tooltip
                   contentStyle={{
@@ -143,7 +87,6 @@ const WardenDashboard = () => {
                     border: "1px solid #1f2937",
                     borderRadius: "14px",
                   }}
-                  itemStyle={{ color: "#8b5cf6" }}
                 />
 
                 <Area
@@ -159,7 +102,6 @@ const WardenDashboard = () => {
           </div>
         </Card>
 
-        {/* Complaints */}
         <Card className="bg-white/5 backdrop-blur-md border border-white/10 hover:shadow-[0_0_35px_rgba(244,63,94,0.15)] transition duration-300">
           <h3 className="text-lg font-semibold mb-6 flex items-center gap-2 text-white">
             <AlertCircle className="text-rose-400" size={20} />
@@ -205,6 +147,7 @@ const WardenDashboard = () => {
             View All Complaints
           </button>
         </Card>
+
       </div>
     </div>
   );

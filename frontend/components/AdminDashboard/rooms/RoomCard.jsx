@@ -29,7 +29,7 @@ export const RoomCard = ({ room, role, setRooms }) => {
     const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     await axios.put(
-      `${url}/api/v1/admin/rooms/update/${room.id}`,
+      `${url}/api/v1/${role}/rooms/update/${room.id}`,
       { capacity: Number(capacity) },
       { withCredentials: true }
     );
@@ -69,7 +69,7 @@ const deleteRoom = async () => {
     const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
     await axios.delete(
-      `${url}/api/v1/admin/rooms/${room.id}`,
+      `${url}/api/v1/${role}/rooms/${room.id}`,
       { withCredentials: true }
     );
 

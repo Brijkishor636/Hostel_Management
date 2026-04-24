@@ -42,12 +42,18 @@ const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (!secretKey) {
             return res.status(500).json({ msg: "JWT secret not configured" });
         }
-        const token = jsonwebtoken_1.default.sign({ userId: user.id, role: user.role, hostelId: user.hostelId }, secretKey, { expiresIn: "1h" });
+        const token = jsonwebtoken_1.default.sign({ userId: user.id, role: user.role, hostelId: user.hostelId, isActive: user.isActive }, secretKey, { expiresIn: "1h" });
         res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
-            maxAge: 24 * 60 * 60 * 1000
+            maxAge: 60 * 60 * 1000
+        });
+        res.cookie("role", user.role, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 60 * 60 * 1000
         });
         return res.status(200).json({
             msg: "Login successful",
@@ -102,6 +108,12 @@ const currentUser = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.currentUser = currentUser;
 const logout = (req, res) => {
     res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/"
+    });
+    res.clearCookie("role", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",

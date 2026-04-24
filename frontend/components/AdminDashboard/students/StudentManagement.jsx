@@ -24,6 +24,7 @@ const StudentManagement = () => {
   const pathname = usePathname();
 
   const role = pathname.startsWith("/warden") ? "warden" : "admin";
+  const baseRoute = `/${role}`;
 
   const [debouncedSearch, setDebouncedSearch] = useState(search);
 
@@ -43,9 +44,8 @@ const StudentManagement = () => {
 
   const clearSearch = () => setSearch("");
 
-  const baseRoute = pathname.startsWith("/warden") ? "/warden" : "/admin";
-
-  const deleteStudent = async (id) => {
+  const deleteStudent = async (id, e) => {
+    e.stopPropagation(); 
     try {
       await axios.delete(
         `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/${role}/student/${id}`,
@@ -141,10 +141,9 @@ const StudentManagement = () => {
         </div>
       </div>
 
-      {/* Table + Mobile Cards */}
+      {/* Table */}
       <Card className="!p-0 overflow-hidden border-white/10 bg-white/5 backdrop-blur-md">
 
-        {/* Desktop */}
         <div className="overflow-x-auto hidden md:block">
           <table className="w-full text-left text-sm">
             <thead className="bg-white/5 text-gray-400 text-[11px]">
@@ -159,19 +158,28 @@ const StudentManagement = () => {
 
             <tbody className="divide-y divide-white/5">
               {students.map((student) => (
-                <tr key={student.id}>
+                <tr
+                  key={student.id}
+                  onClick={() =>
+                    router.push(`${baseRoute}/students/${student.id}`)
+                  }
+                  className="cursor-pointer hover:bg-white/5 transition"
+                >
                   <td className="px-8 py-5">{student.name}</td>
+
                   <td className="px-6 py-5">
                     {student.student?.room?.number || "N/A"}
                   </td>
+
                   <td className="px-6 py-5">{student.email}</td>
+
                   <td className="px-6 py-5">
                     {student.student?.regNo}
                   </td>
 
                   <td className="px-8 py-5 text-right">
                     <button
-                      onClick={() => deleteStudent(student.id)}
+                      onClick={(e) => deleteStudent(student.id, e)}
                       className={`px-3 py-1 rounded-lg text-xs cursor-pointer ${
                         student.isActive
                           ? "bg-red-500/20 text-red-400"
@@ -190,7 +198,13 @@ const StudentManagement = () => {
         {/* Mobile */}
         <div className="md:hidden flex flex-col divide-y divide-white/5">
           {students.map((student) => (
-            <div key={student.id} className="p-4 space-y-2">
+            <div
+              key={student.id}
+              onClick={() =>
+                router.push(`${baseRoute}/students/${student.id}`)
+              }
+              className="p-4 space-y-2 cursor-pointer hover:bg-white/5"
+            >
               <p className="font-semibold">{student.name}</p>
               <p className="text-sm text-gray-400">{student.email}</p>
               <p className="text-sm text-gray-400">
@@ -202,7 +216,7 @@ const StudentManagement = () => {
 
               <div className="flex justify-end pt-2">
                 <button
-                  onClick={() => deleteStudent(student.id)}
+                  onClick={(e) => deleteStudent(student.id, e)}
                   className={`px-4 py-2 rounded-lg text-sm ${
                     student.isActive
                       ? "bg-red-500/20 text-red-400"

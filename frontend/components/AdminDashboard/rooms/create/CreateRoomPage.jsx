@@ -5,9 +5,13 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import InputField from "../../ui/InputField";
 import { toast } from "react-toastify";
+import { usePathname } from "next/navigation";
 
 export default function CreateRoomPage() {
   const [isLoading, setIsLoading] = useState(false);
+
+  const pathname = usePathname();
+  const role = pathname.split("/")[1];
 
   const {
     control,
@@ -17,7 +21,7 @@ export default function CreateRoomPage() {
     reset,
   } = useForm({
     defaultValues: {
-      rooms: [{ roomNo: "", capacity: "" }], // ✅ added capacity
+      rooms: [{ roomNo: "", capacity: "" }],
     },
   });
 
@@ -34,11 +38,11 @@ export default function CreateRoomPage() {
       const formattedData = {
         rooms: data.rooms.map((r) => ({
           roomNo: r.roomNo,
-          capacity: Number(r.capacity), 
+          capacity: Number(r.capacity),
         })),
       };
 
-      const res = await fetch(`${url}/api/v1/admin/rooms/create`, {
+      const res = await fetch(`${url}/api/v1/${role}/rooms/create`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -72,7 +76,6 @@ export default function CreateRoomPage() {
           
           <h1 className="text-2xl font-bold text-center">Create Rooms</h1>
 
-          {/* Rooms List */}
           <div className="flex flex-col gap-4">
             {fields.map((field, index) => (
               <div key={field.id} className="flex items-center gap-3">
@@ -104,7 +107,6 @@ export default function CreateRoomPage() {
                   error={errors.rooms?.[index]?.capacity?.message}
                 />
 
-                {/* Remove Button */}
                 {fields.length > 1 && (
                   <button
                     type="button"
@@ -118,17 +120,15 @@ export default function CreateRoomPage() {
             ))}
           </div>
 
-          {/* Add Room Button */}
           <button
             type="button"
-            onClick={() => append({ roomNo: "", capacity: "" })} // ✅ updated
+            onClick={() => append({ roomNo: "", capacity: "" })}
             className="flex items-center gap-2 justify-center p-2 bg-white/5 rounded-lg hover:bg-white/10"
           >
             <Plus size={18} />
             Add Room
           </button>
 
-          {/* Submit */}
           <button
             type="submit"
             disabled={isLoading}

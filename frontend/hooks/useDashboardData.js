@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-export const useDashboardData = (role = "admin") => {
+export const useDashboardData = (role) => {
   const [students, setStudents] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);

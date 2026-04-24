@@ -10,7 +10,7 @@ const roleMiddleware_1 = require("../middlewares/roleMiddleware");
 const studentPaymentController_1 = require("../controller/studentPaymentController");
 const studentRouter = express_1.default.Router();
 studentRouter.use(authMiddleware_1.verifyToken);
-studentRouter.use((0, roleMiddleware_1.authorizeRole)("STUDENT"));
+studentRouter.use((0, roleMiddleware_1.authorizeRole)("ADMIN", "WARDEN", "STUDENT"));
 studentRouter.get("/me", (req, res) => (0, userController_1.getSelfDetails)(req, res));
 studentRouter.put("/update-selfdetail", (req, res) => (0, userController_1.updateSelfProfile)(req, res));
 studentRouter.get("/payments", (req, res) => (0, studentPaymentController_1.getMyPayments)(req, res));
