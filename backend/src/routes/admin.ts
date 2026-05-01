@@ -4,7 +4,7 @@ import { authorizeRole } from "../middlewares/roleMiddleware";
 import { createStudent, createWarden, deleteStudent, deleteWarden, getAdmins, getInactiveStudents, getInactiveWardens, getSingleStudent, getSingleWarden, getStudents, getUnassignedStudents, getwardens, updateStudent, updateUser} from "../controller/adminController";
 import { getSelfDetails, updateSelfProfile } from "../controller/userController";
 import { allocateRoom, createRooms, deleteRoom, getAllRooms, getRooms, getSingleRoom, updateRoom } from "../controller/roomController";
-import { createCharge, generatePayments, getCharges } from "../controller/paymentController";
+import { createCharge, createChargeType, generateInvoiceForStudent, getAllStudentsWithDues, getDashboardSummary, getStudentPayments, payInvoice } from "../controller/paymentController";
 import { getAllStudents, inactiveStudent, removeStudent } from "../controller/admin/studentController";
 import { inactiveWarden } from "../controller/admin/wardenController";
 
@@ -64,9 +64,13 @@ adminRouter.put("/rooms/remove-student/:studentId", (req: Request, res: Response
 adminRouter.get("/unassigned-student", (req: Request, res: Response) => getUnassignedStudents(req, res));
 
 
-adminRouter.post("/charges", createCharge);            
-adminRouter.get("/charges", getCharges);                 
-adminRouter.post("/payments/generate", generatePayments); 
+adminRouter.get("/student-payments/:studentId", getStudentPayments);
+adminRouter.post("/charge", createCharge);
+adminRouter.post("/invoice", generateInvoiceForStudent);
+adminRouter.post("/pay", payInvoice);
+adminRouter.get("/summary", getDashboardSummary);
+adminRouter.get("/students-dues", getAllStudentsWithDues);
+adminRouter.post("/charge-type", createChargeType);
 
 
 

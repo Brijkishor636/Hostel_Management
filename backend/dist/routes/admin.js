@@ -40,9 +40,13 @@ adminRouter.put("/rooms/update/:id", (req, res) => (0, roomController_1.updateRo
 adminRouter.delete("/rooms/:id", (req, res) => (0, roomController_1.deleteRoom)(req, res));
 adminRouter.put("/rooms/remove-student/:studentId", (req, res) => (0, studentController_1.removeStudent)(req, res));
 adminRouter.get("/unassigned-student", (req, res) => (0, adminController_1.getUnassignedStudents)(req, res));
-adminRouter.post("/charges", paymentController_1.createCharge);
-adminRouter.get("/charges", paymentController_1.getCharges);
-adminRouter.post("/payments/generate", paymentController_1.generatePayments);
+adminRouter.get("/student-payments/:studentId", paymentController_1.getStudentPayments);
+adminRouter.post("/charge", paymentController_1.createCharge);
+adminRouter.post("/invoice", paymentController_1.generateInvoiceForStudent);
+adminRouter.post("/pay", paymentController_1.payInvoice);
+adminRouter.get("/summary", paymentController_1.getDashboardSummary);
+adminRouter.get("/students-dues", paymentController_1.getAllStudentsWithDues);
+adminRouter.post("/charge-type", paymentController_1.createChargeType);
 // For dashboard-data
 adminRouter.get("/allstudents", (req, res) => (0, studentController_1.getAllStudents)(req, res));
 adminRouter.get("/allrooms", (req, res) => (0, roomController_1.getAllRooms)(req, res));
