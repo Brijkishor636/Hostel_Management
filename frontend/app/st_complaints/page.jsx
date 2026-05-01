@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Sidebar from "../st_components/Sidebar";
-import Navbar from "../st_components/Navbar";
+import Sidebar from "../../components/StudentDashboard/Sidebar";
+import Navbar from "../../components/StudentDashboard/Navbar";
 
 const dummyComplaints = [
   {

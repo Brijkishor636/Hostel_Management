@@ -1,5 +1,5 @@
-import Sidebar from "../st_components/Sidebar";
-import Navbar from "../st_components/Navbar";
+import Sidebar from "../../components/StudentDashboard/Sidebar";
+import Navbar from "../../components/StudentDashboard/Navbar";
 
 export default function Overview() {
 
@@ -15,6 +15,8 @@ export default function Overview() {
     dues: "₹1,500",
     complaints: 2
   };
+
+  
 
   return (
     <div className="flex bg-gray-950 min-h-screen text-white">

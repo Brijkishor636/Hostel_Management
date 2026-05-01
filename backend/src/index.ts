@@ -4,6 +4,8 @@ import userRouter from "./routes/user";
 import adminRouter from "./routes/admin";
 import wardenRouter from "./routes/warden";
 import studentRouter from "./routes/student";
+ import studentRoutes from "./routes/student.route";
+
 import cors from "cors"
 
 const app = express();

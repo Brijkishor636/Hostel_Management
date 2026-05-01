@@ -210,7 +210,7 @@ export default function LoginPage() {
 
     if (role === "admin") router.push("/admin");
     else if (role === "warden") router.push("/warden");
-    else router.push("/st_dashboard");
+    else router.push("/student");
 
   } catch (err) {
     console.error(err);

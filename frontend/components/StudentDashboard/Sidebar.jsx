@@ -14,19 +14,19 @@ export default function Sidebar() {
           Overview
         </Link>
 
-        <Link href="/my_room" className="flex items-center gap-3 hover:text-pink-400">
+        <Link href="/student/room" className="flex items-center gap-3 hover:text-pink-400">
           <Bed size={20} />
           My Room
         </Link>
 
 
-        <Link href="/st_dashboard" className="flex items-center gap-3 hover:text-pink-400">
+        <Link href="/student/payments" className="flex items-center gap-3 hover:text-pink-400">
           <CreditCard size={20} />
           Payments
         </Link>
 
 
-        <Link href="/st_complaints" className="flex items-center gap-3 hover:text-pink-400">
+        <Link href="/student/complaints" className="flex items-center gap-3 hover:text-pink-400">
           <MessageSquare size={20} />
           Complaints
         </Link>

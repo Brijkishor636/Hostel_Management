@@ -1,5 +1,5 @@
-import Sidebar from "../../components/StudentDashboard/Sidebar";
-import Navbar from "../../components/StudentDashboard/Navbar";
+import Sidebar from "../st_components/Sidebar";
+import Navbar from "../st_components/Navbar";
 
 export default function MyRoom() {
 
