@@ -13,7 +13,7 @@ export function middleware(request) {
     pathname.startsWith("/warden") ||
     pathname.startsWith("/st_dashboard");
 
-  const isLoggedIn = !!token;
+  const isLoggedIn = token;
 
   if (isPublicRoute && isLoggedIn) {
     return NextResponse.redirect(new URL("/", request.url));
@@ -30,11 +30,16 @@ export function middleware(request) {
   }
 
   if (isLoggedIn && role === "warden") {
-    if (pathname.startsWith("/admin")) {
+    if (!pathname.startsWith("/warden")) {
       return NextResponse.redirect(new URL("/warden", request.url));
     }
   }
 
+  if(isLoggedIn && role === "admin") {
+    if (!pathname.startsWith("/admin")) {
+      return NextResponse.redirect(new URL("/admin", request.url));
+    } 
+  }
   return NextResponse.next();
 }
 
@@ -43,6 +48,6 @@ export const config = {
     "/login",
     "/admin/:path*",
     "/warden/:path*",
-    "/student/:path*",
+    "/st_dashboard/:path*",
   ],
 };

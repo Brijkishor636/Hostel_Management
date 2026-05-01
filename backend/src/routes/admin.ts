@@ -4,9 +4,10 @@ import { authorizeRole } from "../middlewares/roleMiddleware";
 import { createStudent, createWarden, deleteStudent, deleteWarden, getAdmins, getInactiveStudents, getInactiveWardens, getSingleStudent, getSingleWarden, getStudents, getUnassignedStudents, getwardens, updateStudent, updateUser} from "../controller/adminController";
 import { getSelfDetails, updateSelfProfile } from "../controller/userController";
 import { allocateRoom, createRooms, deleteRoom, getAllRooms, getRooms, getSingleRoom, updateRoom } from "../controller/roomController";
-import { createCharge, createChargeType, generateInvoiceForStudent, getAllStudentsWithDues, getDashboardSummary, getStudentPayments, payInvoice } from "../controller/paymentController";
+import { createCharge, createChargeType, generateInvoiceForStudent, getAllStudentsWithDues, getDashboardSummary, getStudentPayments, getStudentTransactions, payInvoice } from "../controller/paymentController";
 import { getAllStudents, inactiveStudent, removeStudent } from "../controller/admin/studentController";
 import { inactiveWarden } from "../controller/admin/wardenController";
+import { getAllComplaints, getComplaintById, updateComplaintPriority, updateComplaintStatus } from "../controller/admin/complaintController";
 
 const adminRouter = express.Router();
 
@@ -71,7 +72,13 @@ adminRouter.post("/pay", payInvoice);
 adminRouter.get("/summary", getDashboardSummary);
 adminRouter.get("/students-dues", getAllStudentsWithDues);
 adminRouter.post("/charge-type", createChargeType);
+adminRouter.get("/student-transactions/:studentId", getStudentTransactions);
 
+
+adminRouter.get("/complaints", getAllComplaints);
+adminRouter.get("/complaints/:id", getComplaintById);
+adminRouter.patch("/complaints/:id/status", updateComplaintStatus);
+adminRouter.patch("/complaints/:id/priority", updateComplaintPriority);
 
 
 // For dashboard-data

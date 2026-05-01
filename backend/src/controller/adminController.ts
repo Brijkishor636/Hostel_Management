@@ -294,12 +294,6 @@ export const deleteStudent = async (req: Request, res: Response) => {
       });
     }
 
-    if (existUser.role === "ADMIN") {
-      return res.status(400).json({
-        msg: "Admin cannot be deleted",
-      });
-    }
-
     const student = existUser.student;
 
     await prisma.$transaction(async (tx) => {

@@ -54,7 +54,7 @@ const WardenDashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-        <Card className="lg:col-span-2 bg-white/5 backdrop-blur-md border border-white/10 hover:shadow-[0_0_35px_rgba(99,102,241,0.25)] transition duration-300">
+        <Card className="lg:col-span-2 bg-white/5 backdrop-blur-md border border-white/10 hover:shadow-[0_0_10px_rgba(99,102,241,0.25)] transition duration-300">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 gap-4">
             <h3 className="text-lg font-semibold flex items-center gap-2 text-white">
               <Activity className="text-indigo-400" size={20} />

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createChargeType = exports.getAllStudentsWithDues = exports.getDashboardSummary = exports.getStudentPayments = exports.payInvoice = exports.generateInvoiceForStudent = exports.generateInvoices = exports.createCharge = void 0;
+exports.getStudentTransactions = exports.createChargeType = exports.getAllStudentsWithDues = exports.getDashboardSummary = exports.getStudentPayments = exports.payInvoice = exports.generateInvoiceForStudent = exports.generateInvoices = exports.createCharge = void 0;
 const client_1 = require("@prisma/client");
 const prisma = new client_1.PrismaClient();
 const createCharge = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -297,3 +297,37 @@ const createChargeType = (req, res) => __awaiter(void 0, void 0, void 0, functio
     }
 });
 exports.createChargeType = createChargeType;
+const getStudentTransactions = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { studentId } = req.params;
+        const transactions = yield prisma.paymentTransaction.findMany({
+            where: { studentId },
+            include: {
+                invoice: {
+                    include: {
+                        charge: {
+                            include: {
+                                chargeType: true,
+                            },
+                        },
+                    },
+                },
+            },
+            orderBy: { paidAt: "desc" },
+            take: 7,
+        });
+        const formatted = transactions.map((t) => ({
+            id: t.id,
+            amount: t.amount,
+            paidAt: t.paidAt,
+            type: t.invoice.charge.chargeType.name,
+            status: t.invoice.status,
+        }));
+        return res.json(formatted);
+    }
+    catch (e) {
+        console.log(e);
+        return res.status(500).json({ msg: "Internal server error" });
+    }
+});
+exports.getStudentTransactions = getStudentTransactions;

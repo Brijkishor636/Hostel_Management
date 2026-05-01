@@ -8,6 +8,7 @@ import AddChargeModal from "./AddChargeModal";
 import axios from "axios";
 import { usePathname } from "next/navigation";
 import { toast } from "react-toastify";
+import RecentTransactions from "./RecentTransactions";
 
 const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -21,6 +22,7 @@ export default function StudentPayments({ student, onBack, onPaymentSuccess }) {
   const [payModal, setPayModal] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState(null);
   const [amount, setAmount] = useState("");
+  const [refresh, setRefresh] = useState(false);
 
   const fetchPayments = async () => {
     try {
@@ -72,7 +74,7 @@ export default function StudentPayments({ student, onBack, onPaymentSuccess }) {
       setPayModal(false);
       fetchPayments();
       onPaymentSuccess && onPaymentSuccess();
-
+      setRefresh(prev => !prev);
       toast.success("Payment successful");
     } catch (err) {
       console.error(err);
@@ -149,7 +151,7 @@ export default function StudentPayments({ student, onBack, onPaymentSuccess }) {
         </table>
       </Card>
 
-      {/* 🔥 MOBILE CARDS */}
+      {/* MOBILE CARDS */}
       <div className="sm:hidden space-y-3">
         {payments?.map((p) => {
           const remaining = p.amount - p.paidAmount;
@@ -191,6 +193,8 @@ export default function StudentPayments({ student, onBack, onPaymentSuccess }) {
           );
         })}
       </div>
+
+      <RecentTransactions studentId={student.studentId} refresh={refresh} />
 
       {payModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">

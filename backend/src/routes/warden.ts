@@ -5,11 +5,13 @@ import { authorizeRole } from "../middlewares/roleMiddleware";
 import { getSelfDetails, updateSelfProfile } from "../controller/userController";
 import { allocateRoom, createRooms, deleteRoom, getAllRooms, getRooms, getSingleRoom, updateRoom } from "../controller/roomController";
 import { getAllStudents, inactiveStudent, removeStudent } from "../controller/admin/studentController";
+import { createCharge, createChargeType, generateInvoiceForStudent, getAllStudentsWithDues, getDashboardSummary, getStudentPayments, getStudentTransactions, payInvoice } from "../controller/paymentController";
+import { getAllComplaints, getComplaintById, updateComplaintPriority, updateComplaintStatus } from "../controller/admin/complaintController";
 
 const wardenRouter = express.Router();
 
 wardenRouter.use(verifyToken);
-wardenRouter.use(authorizeRole("ADMIN","WARDEN"));
+wardenRouter.use(authorizeRole("WARDEN"));
 
 wardenRouter.post("/create-student", (req: Request, res: Response) => createStudent(req, res));
 
@@ -48,5 +50,23 @@ wardenRouter.delete("/student/:id", (req: Request, res: Response) => deleteStude
 
 wardenRouter.get("/allstudents", (req: Request, res: Response) => getAllStudents(req, res));
 wardenRouter.get("/allrooms", (req: Request, res: Response) => getAllRooms(req, res));
+
+
+
+wardenRouter.get("/student-payments/:studentId", getStudentPayments);
+wardenRouter.post("/charge", createCharge);
+wardenRouter.post("/invoice", generateInvoiceForStudent);
+wardenRouter.post("/pay", payInvoice);
+wardenRouter.get("/summary", getDashboardSummary);
+wardenRouter.get("/students-dues", getAllStudentsWithDues);
+wardenRouter.post("/charge-type", createChargeType);
+wardenRouter.get("/student-transactions/:studentId", getStudentTransactions);
+
+
+
+wardenRouter.get("/complaints", getAllComplaints);
+wardenRouter.get("/complaints/:id", getComplaintById);
+wardenRouter.patch("/complaints/:id/status", updateComplaintStatus);
+wardenRouter.patch("/complaints/:id/priority", updateComplaintPriority);
 
 export default wardenRouter;

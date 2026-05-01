@@ -100,9 +100,7 @@ model Charge {
   invoices   Invoice[]
 }
 
-/////////////////////////
-// 🔹 INVOICE (IMPORTANT)
-/////////////////////////
+
 
 model Invoice {
   id        String   @id @default(uuid())
@@ -125,9 +123,7 @@ model Invoice {
   createdAt DateTime @default(now())
 }
 
-/////////////////////////
-// 🔹 PAYMENT TRANSACTIONS
-/////////////////////////
+
 
 model PaymentTransaction {
   id         String   @id @default(uuid())
@@ -144,15 +140,16 @@ model PaymentTransaction {
   invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 }
 
-/////////////////////////
 
 model Complaint {
-  id        String            @id @default(uuid())
+  id        String              @id @default(uuid())
   studentId String
-  message   String
-  status    ComplaintStatus   @default(PENDING)
-  createdAt DateTime          @default(now())
+  title     String          
+  message   String             
+  status    ComplaintStatus     @default(PENDING)
+  priority  ComplaintPriority   @default(MEDIUM)
 
+  createdAt DateTime            @default(now())
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
@@ -167,7 +164,6 @@ model Visitor {
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
-/////////////////////////
 
 enum Role {
   ADMIN
@@ -187,7 +183,6 @@ enum ComplaintStatus {
   RESOLVED
 }
 
-/////////////////////////
 
 enum ChargeFrequency {
   ONE_TIME
@@ -201,4 +196,10 @@ enum InvoiceStatus {
   PENDING
   PARTIAL
   PAID
+}
+
+enum ComplaintPriority {
+  LOW
+  MEDIUM
+  HIGH
 }

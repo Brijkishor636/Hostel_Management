@@ -286,11 +286,6 @@ const deleteStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 msg: "Student not found",
             });
         }
-        if (existUser.role === "ADMIN") {
-            return res.status(400).json({
-                msg: "Admin cannot be deleted",
-            });
-        }
         const student = existUser.student;
         yield prisma.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
             if (student === null || student === void 0 ? void 0 : student.roomId) {

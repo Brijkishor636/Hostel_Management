@@ -15,7 +15,7 @@ export default function UserProvider({ children }) {
         const res = await axios.get(`${url}/api/v1/user/current`, {
           withCredentials: true,
         });
-
+        // console.log(res.data.user);
         setUser(res.data.user);
       } catch (error) {
         console.log(error);

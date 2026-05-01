@@ -8,7 +8,6 @@ import { useStudentsDues } from "../../../hooks/useStudentsDues";
 import { usePathname } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { size } from "zod";
 
 const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -29,7 +28,7 @@ export default function Payments() {
   const [showChargeTypeModal, setShowChargeTypeModal] = useState(false);
   const [chargeTypeName, setChargeTypeName] = useState("");
 
-  const { students, total, loading } = useStudentsDues({
+  const { students, total, loading, setRefresh } = useStudentsDues({
     role,
     page,
     limit,
@@ -76,7 +75,10 @@ export default function Payments() {
       <StudentPayments
         student={selectedStudent}
         onBack={() => setSelectedStudent(null)}
-        onPaymentSuccess={fetchSummary}
+        onPaymentSuccess={() => {
+        fetchSummary();
+        setRefresh(prev => !prev);
+      }}
       />
     );
   }
@@ -178,6 +180,28 @@ export default function Payments() {
           ))}
         </div>
       </Card>
+
+      {/* ✅ PAGINATION FOOTER */}
+      <div className="px-6 py-4 border-t border-white/10 flex justify-between text-sm text-gray-400">
+          <p>{students.length} / {total}</p>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(p - 1, 1))}
+              className="px-4 py-2 bg-white/5 rounded-lg"
+            >
+              Prev
+            </button>
+
+            <button
+              onClick={() => setPage((p) => p + 1)}
+              disabled={page * limit >= total}
+              className="px-4 py-2 bg-white/5 rounded-lg disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
 
       {showChargeTypeModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50">

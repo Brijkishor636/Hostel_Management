@@ -331,3 +331,41 @@ export const createChargeType = async (req: any, res: Response) => {
     return res.status(500).json({ msg: "Internal server error" });
   }
 };
+
+
+
+export const getStudentTransactions = async (req: any, res: Response) => {
+  try {
+    const { studentId } = req.params;
+
+    const transactions = await prisma.paymentTransaction.findMany({
+      where: { studentId },
+      include: {
+        invoice: {
+          include: {
+            charge: {
+              include: {
+                chargeType: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { paidAt: "desc" },
+      take: 7,
+    });
+
+    const formatted = transactions.map((t) => ({
+      id: t.id,
+      amount: t.amount,
+      paidAt: t.paidAt,
+      type: t.invoice.charge.chargeType.name,
+      status: t.invoice.status, 
+    }));
+
+    return res.json(formatted);
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({ msg: "Internal server error" });
+  }
+};
