@@ -1,6 +1,7 @@
 import React from "react";
 import Card from "../ui/Cards";
 import Badge from "../ui/Badge";
+import Swal from "sweetalert2";
 import { DoorOpen, Wrench, Users, Edit, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
@@ -67,6 +68,19 @@ export const RoomCard = ({ room, role, setRooms }) => {
 const deleteRoom = async () => {
   try {
     const url = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const result = await Swal.fire({
+          title: "Delete room?",
+          text: "This action cannot be undone",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#6366f1",
+          cancelButtonColor: "#ef4444",
+          confirmButtonText: "Yes, delete",
+          cancelButtonText: "Cancel",
+          background: "#020617",
+          color: "#fff",
+        });
+        if (!result.isConfirmed) return;
 
     await axios.delete(
       `${url}/api/v1/${role}/rooms/${room.id}`,

@@ -7,6 +7,7 @@ import { allocateRoom, createRooms, deleteRoom, getAllRooms, getRooms, getSingle
 import { getAllStudents, inactiveStudent, removeStudent } from "../controller/admin/studentController";
 import { createCharge, createChargeType, generateInvoiceForStudent, getAllStudentsWithDues, getDashboardSummary, getStudentPayments, getStudentTransactions, payInvoice } from "../controller/paymentController";
 import { getAllComplaints, getComplaintById, updateComplaintPriority, updateComplaintStatus } from "../controller/admin/complaintController";
+import { createNotice, deleteNotice, getAllNotices, getSingleNotice, updateNotice } from "../controller/noticeController";
 
 const wardenRouter = express.Router();
 
@@ -68,5 +69,12 @@ wardenRouter.get("/complaints", getAllComplaints);
 wardenRouter.get("/complaints/:id", getComplaintById);
 wardenRouter.patch("/complaints/:id/status", updateComplaintStatus);
 wardenRouter.patch("/complaints/:id/priority", updateComplaintPriority);
+
+
+wardenRouter.post("/notices", createNotice);
+wardenRouter.get("/notices", getAllNotices);
+wardenRouter.patch("/notices/:id", updateNotice);
+wardenRouter.delete("/notices/:id", deleteNotice);
+wardenRouter.get("/notices/:id", getSingleNotice);
 
 export default wardenRouter;

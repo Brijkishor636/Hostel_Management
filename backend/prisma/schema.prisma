@@ -17,6 +17,7 @@ model Hostel {
   rooms     Room[]
   students  Student[]
   charges   Charge[]
+  notices Notice[]
 }
 
 model User {
@@ -164,6 +165,29 @@ model Visitor {
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
+
+model Notice {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  type        NoticeType @default(GENERAL)
+  isActive    Boolean  @default(true)
+
+  hostelId    String
+  hostel      Hostel   @relation(fields: [hostelId], references: [id], onDelete: Cascade)
+
+  createdBy   String
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime?
+
+  @@index([hostelId])
+}
+
+
+enum NoticeType {
+  GENERAL
+  URGENT
+}
 
 enum Role {
   ADMIN

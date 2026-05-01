@@ -9,6 +9,7 @@ const authMiddleware_1 = require("../middlewares/authMiddleware");
 const roleMiddleware_1 = require("../middlewares/roleMiddleware");
 const complaintController_1 = require("../controller/student/complaintController");
 const complaintController_2 = require("../controller/admin/complaintController");
+const noticeController_1 = require("../controller/noticeController");
 const studentRouter = express_1.default.Router();
 studentRouter.use(authMiddleware_1.verifyToken);
 studentRouter.use((0, roleMiddleware_1.authorizeRole)("STUDENT"));
@@ -17,4 +18,5 @@ studentRouter.put("/update-selfdetail", (req, res) => (0, userController_1.updat
 studentRouter.post("/complaints", complaintController_1.createComplaint);
 studentRouter.get("/complaints", complaintController_1.getMyComplaints);
 studentRouter.get("/complaints/:id", complaintController_2.getComplaintById);
+studentRouter.get("/notices", noticeController_1.getAllNotices);
 exports.default = studentRouter;

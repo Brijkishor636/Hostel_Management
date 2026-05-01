@@ -8,6 +8,7 @@ import { createCharge, createChargeType, generateInvoiceForStudent, getAllStuden
 import { getAllStudents, inactiveStudent, removeStudent } from "../controller/admin/studentController";
 import { inactiveWarden } from "../controller/admin/wardenController";
 import { getAllComplaints, getComplaintById, updateComplaintPriority, updateComplaintStatus } from "../controller/admin/complaintController";
+import { createNotice, deleteNotice, getAllNotices, getSingleNotice, updateNotice } from "../controller/noticeController";
 
 const adminRouter = express.Router();
 
@@ -79,6 +80,13 @@ adminRouter.get("/complaints", getAllComplaints);
 adminRouter.get("/complaints/:id", getComplaintById);
 adminRouter.patch("/complaints/:id/status", updateComplaintStatus);
 adminRouter.patch("/complaints/:id/priority", updateComplaintPriority);
+
+
+adminRouter.post("/notices", createNotice);
+adminRouter.get("/notices", getAllNotices);
+adminRouter.patch("/notices/:id", updateNotice);
+adminRouter.delete("/notices/:id", deleteNotice);
+adminRouter.get("/notices/:id", getSingleNotice);
 
 
 // For dashboard-data

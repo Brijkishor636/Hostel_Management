@@ -4,6 +4,7 @@ import { verifyToken } from "../middlewares/authMiddleware";
 import { authorizeRole } from "../middlewares/roleMiddleware";
 import { createComplaint, getMyComplaints } from "../controller/student/complaintController";
 import { getComplaintById } from "../controller/admin/complaintController";
+import { getAllNotices } from "../controller/noticeController";
 
 const studentRouter = express.Router();
 
@@ -19,5 +20,8 @@ studentRouter.put("/update-selfdetail", (req: Request, res: Response) => updateS
 studentRouter.post("/complaints", createComplaint);
 studentRouter.get("/complaints", getMyComplaints);
 studentRouter.get("/complaints/:id", getComplaintById);
+
+
+studentRouter.get("/notices", getAllNotices);
 
 export default studentRouter;

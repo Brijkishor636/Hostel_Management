@@ -5,12 +5,13 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import InputField from "../../ui/InputField";
 import { toast } from "react-toastify";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function CreateRoomPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const pathname = usePathname();
+  const router = useRouter();
   const role = pathname.split("/")[1];
 
   const {
@@ -71,6 +72,15 @@ export default function CreateRoomPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 p-6 text-white">
       <div className="w-full max-w-3xl bg-slate-900 border border-slate-800 rounded-3xl p-8 shadow-xl">
+
+        <div className="mb-4">
+          <button
+            onClick={() => router.back()}
+            className="px-3 py-1 bg-violet-600 hover:bg-violet-700 rounded-lg text-sm"
+          >
+            ← Back
+          </button>
+        </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
           
