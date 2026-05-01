@@ -1,21 +1,20 @@
 "use client";
 
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams } from "next/navigation";
-import UserContext from "../../../context/UserContext";
+import { useParams, usePathname } from "next/navigation";
 import { toast } from "react-toastify";
 
 const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function Unassigned_Students() {
-  const { user } = useContext(UserContext);
   const { id: roomId } = useParams();
+  const pathname = usePathname();
+
+  const role = pathname.split("/")[1];
 
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const role = user?.role?.toLowerCase();
 
   useEffect(() => {
     if (!role) return;
@@ -57,7 +56,7 @@ export default function Unassigned_Students() {
     }
   };
 
-  if (!user) return <p className="text-white p-6">Loading user...</p>;
+  if (!role) return <p className="text-white p-6">Loading...</p>;
   if (loading) return <p className="text-white p-6">Loading...</p>;
 
   return (

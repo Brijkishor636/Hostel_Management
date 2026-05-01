@@ -6,34 +6,45 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyToken = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const verifyToken = (req, res, next) => {
-    let token = req.cookies.token;
+    const token = req.cookies.token;
     if (!token) {
-        return res.status(400).json({
-            msg: "no token, authorization denied!!"
+        return res.status(401).json({
+            msg: "No token, authorization denied!",
         });
     }
     try {
         const secretKey = process.env.JWT_SECRET;
         const decoded = jsonwebtoken_1.default.verify(token, secretKey);
         if (typeof decoded === "object" && decoded !== null) {
+            const userData = decoded;
+            if (!userData.isActive) {
+                return res.status(403).json({
+                    msg: "User is inactive. Access denied.",
+                });
+            }
             req.user = {
-                id: decoded.userId,
-                role: decoded.role,
-                hostelId: decoded.hostelId
+                id: userData.userId,
+                role: userData.role,
+                hostelId: userData.hostelId,
+                isActive: userData.isActive,
             };
-            // console.log(req.user);
             next();
         }
         else {
             return res.status(401).json({
-                msg: "Invalid token payload"
+                msg: "Invalid token payload",
             });
         }
     }
-    catch (e) {
-        console.log(e);
+    catch (err) {
+        if (err.name === "TokenExpiredError") {
+            res.clearCookie("token");
+            return res.status(401).json({
+                msg: "Token expired. Please login again.",
+            });
+        }
         return res.status(500).json({
-            msg: "Internal server error!!"
+            msg: "Internal server error!",
         });
     }
 };

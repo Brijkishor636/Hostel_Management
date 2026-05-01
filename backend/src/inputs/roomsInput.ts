@@ -15,8 +15,7 @@ export const createRoomsInput = z.object({
 });
 
 export const updateRoomInput = z.object({
-  roomNo: z.string().optional(),
-  capacity: z.number().int().positive().optional()
+  capacity: z.number().int().positive(),
 });
 
 

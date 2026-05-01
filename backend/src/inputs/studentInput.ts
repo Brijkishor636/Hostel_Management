@@ -13,7 +13,7 @@ export const updateStudentSchema = z.object({
     mobNo: z.string().optional(),
     regNo: z.string().optional(),
     isActive: z.boolean().optional(),
-    roomNo: z.string().min(3).optional()
+    roomNo: z.string().min(1).optional()
 });
 
 

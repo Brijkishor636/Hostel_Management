@@ -118,12 +118,12 @@ export const createRooms = async (req: Request, res: Response) => {
 };
 
 
-export const getAllRooms = async (req: Request, res: Response) => {
+export const getRooms = async (req: Request, res: Response) => {
   try {
     const hostelId = req.user?.hostelId;
 
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 12;
+    const limit = parseInt(req.query.limit as string) || 8;
 
     const skip = (page - 1) * limit;
 
@@ -207,74 +207,125 @@ export const getSingleRoom = async (req: Request, res: Response) => {
   }
 };
 
-export const updateRoom = async (req: Request, res: Response) =>{
-    try{
-        const parsed = updateRoomInput.safeParse(req.body);
-        const roomNum = req.params.roomNum;
-        if(!parsed.success){
-            return res.status(401).json({
-                msg: "Invalid inputs!!"
-            })
-        }
-        const hostelId = req.user?.hostelId;
-        const existRoom = await prisma.room.findFirst({
-            where: {number: roomNum, hostelId}
-        })
-        if(!existRoom){
-            return res.status(404).json({
-                msg: "Room not found!!"
-            })
-        }
-        await prisma.room.update({
-            where: {
-                id: existRoom.id,
-                hostelId
-            },
-            data: {
-                number: parsed.data.roomNo,
-                capacity: parsed.data.capacity
-            }
-        });
-        return res.status(200).json({
-            msg: "Room updated successfully"
-        });
-    }
-    catch(e){
-        console.log(e);
-        return res.status(500).json({
-            msg: "Internal server error!!"
-        })
-    }
-}
+export const updateRoom = async (req: Request, res: Response) => {
+  try {
+    const parsed = updateRoomInput.safeParse(req.body);
+    const id = req.params.id;
 
-export const deleteRoom = async (req: Request, res: Response) =>{
-    try{
-        const hostelId = req.user?.hostelId;
-        const roomNo = req.params.roomNo;
-        const existRoom = await prisma.room.findFirst({
-            where: {number: roomNo, hostelId}
-        })
-        if(!existRoom){
-            return res.status(400).json({
-                msg: "Room doesn't exists!!"
-            })
-        }
-        if(existRoom?.occupancy != 0){
-            return res.status(400).json({
-                msg: "Room can't be deleted, student exists"
-            })
-        }
-        await prisma.room.delete({
-            where: {id: existRoom.id}
-        })
-        return res.status(200).json({
-            msg: "Room deleted successfully.."
-        })
+    if (!parsed.success) {
+      return res.status(400).json({
+        msg: "Invalid inputs!!",
+      });
     }
-    catch(e){
-        console.log(e);
-        return res.status(500).json({
-            msg: "Internal server error!!"
-        })
+
+    const hostelId = req.user?.hostelId;
+
+    const existRoom = await prisma.room.findFirst({
+      where: { id, hostelId },
+    });
+
+    if (!existRoom) {
+      return res.status(404).json({
+        msg: "Room not found!!",
+      });
     }
-}
+
+    const newCapacity = parsed.data.capacity;
+
+    let newStatus = "AVAILABLE";
+
+    if (existRoom.status === "MAINTENANCE") {
+      newStatus = "MAINTENANCE";
+    } else if (existRoom.occupancy >= newCapacity) {
+      newStatus = "FULL";
+    }
+    const updatedRoom = await prisma.room.update({
+      where: { id: existRoom.id },
+      data: {
+        capacity: newCapacity,
+        status: newStatus,
+      }
+    });
+
+    return res.status(200).json({
+      msg: "Room updated successfully",
+      room: updatedRoom
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      msg: "Internal server error!!",
+    });
+  }
+};
+
+export const deleteRoom = async (req: Request, res: Response) => {
+  try {
+    const hostelId = req.user?.hostelId;
+    const id = req.params.id;
+
+    const existRoom = await prisma.room.findFirst({
+      where: { id, hostelId },
+    });
+
+    if (!existRoom) {
+      return res.status(400).json({
+        msg: "Room doesn't exist!!",
+      });
+    }
+    const count = await prisma.student.count({
+      where: { roomId: id },
+    });
+
+    if (count > 0) {
+      return res.status(400).json({
+        msg: "Room can't be deleted, student exists",
+      });
+    }
+    await prisma.room.delete({
+      where: { id },
+    });
+    return res.status(200).json({
+      msg: "Room deleted successfully..",
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      msg: "Internal server error!!",
+    });
+  }
+};
+
+
+
+export const getAllRooms = async (req: Request, res: Response) => {
+  try {
+    const hostelId = req.user?.hostelId;
+
+    const rooms = await prisma.room.findMany({
+      where: { hostelId },
+      orderBy: {
+        number: "asc",
+      },
+      select: {
+        ...safeRoomSelector,
+        students: {
+          select: {
+            id: true,
+            regNo: true,
+          },
+        },
+      },
+    });
+
+    return res.status(200).json({
+      rooms
+    });
+
+  } catch (e) {
+    console.log(e);
+    return res.status(500).json({
+      msg: "Internal server error!!",
+    });
+  }
+};

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUnassignedStudents = exports.getAdmins = exports.updateUser = exports.updateStudent = exports.deleteWarden = exports.deleteStudent = exports.getSingleWarden = exports.getwardens = exports.createWarden = exports.getSingleStudent = exports.getStudents = exports.createStudent = void 0;
+exports.getInactiveWardens = exports.getInactiveStudents = exports.getUnassignedStudents = exports.getAdmins = exports.updateUser = exports.updateStudent = exports.deleteWarden = exports.deleteStudent = exports.getSingleWarden = exports.getwardens = exports.createWarden = exports.getSingleStudent = exports.getStudents = exports.createStudent = void 0;
 const studentInput_1 = require("../inputs/studentInput");
 const client_1 = require("@prisma/client");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
@@ -272,35 +272,59 @@ const deleteStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     try {
         const id = req.params.id;
         const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
+        if (!hostelId) {
+            return res.status(401).json({ msg: "Unauthorized" });
+        }
         const existUser = yield prisma.user.findUnique({
-            where: {
-                id: id,
-                hostelId,
-                role: "STUDENT"
-            }
+            where: { id },
+            include: {
+                student: true,
+            },
         });
-        if (!existUser) {
+        if (!existUser || existUser.hostelId !== hostelId || existUser.role !== "STUDENT") {
             return res.status(404).json({
-                msg: "Student not found"
+                msg: "Student not found",
             });
         }
-        if (existUser.role === "ADMIN") {
-            return res.status(400).json({
-                msg: "Admin cannot be deleted"
+        const student = existUser.student;
+        yield prisma.$transaction((tx) => __awaiter(void 0, void 0, void 0, function* () {
+            if (student === null || student === void 0 ? void 0 : student.roomId) {
+                const room = yield tx.room.findUnique({
+                    where: { id: student.roomId },
+                });
+                if (room) {
+                    yield tx.room.update({
+                        where: { id: room.id },
+                        data: {
+                            occupancy: { decrement: 1 },
+                            status: room.occupancy - 1 >= room.capacity
+                                ? "FULL"
+                                : "AVAILABLE",
+                        },
+                    });
+                }
+                yield tx.student.update({
+                    where: { id: student.id },
+                    data: {
+                        roomId: null,
+                    },
+                });
+            }
+            yield tx.user.update({
+                where: { id },
+                data: {
+                    isActive: false,
+                },
             });
-        }
-        yield prisma.user.update({
-            where: { id: id, hostelId, role: "STUDENT" },
-            data: { isActive: false }
-        });
+        }));
         return res.status(200).json({
-            msg: "Student deleted successfully.."
+            msg: "Student deleted and room deallocated successfully",
         });
     }
     catch (e) {
         console.log(e);
         return res.status(500).json({
-            msg: "Internal server error!!"
+            msg: "Internal server error!!",
         });
     }
 });
@@ -362,24 +386,32 @@ const updateStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 msg: "Student not found!!"
             });
         }
-        yield prisma.user.update({
-            where: { id },
-            data: {
-                name: parsed.data.name,
-                mobNo: parsed.data.mobNo,
-                isActive: parsed.data.isActive,
-                student: {
-                    upsert: {
-                        update: {
-                            regNo: parsed.data.regNo
-                        },
-                        create: {
-                            regNo: parsed.data.regNo,
-                            hostelId
-                        }
+        const data = {};
+        if (parsed.data.name !== undefined) {
+            data.name = parsed.data.name;
+        }
+        if (parsed.data.mobNo !== undefined) {
+            data.mobNo = parsed.data.mobNo;
+        }
+        if (parsed.data.isActive !== undefined) {
+            data.isActive = parsed.data.isActive;
+        }
+        if (parsed.data.regNo !== undefined) {
+            data.student = {
+                upsert: {
+                    update: {
+                        regNo: parsed.data.regNo
+                    },
+                    create: {
+                        regNo: parsed.data.regNo,
+                        hostelId
                     }
                 }
-            }
+            };
+        }
+        yield prisma.user.update({
+            where: { id },
+            data
         });
         return res.status(200).json({
             msg: "Student updated successfully"
@@ -460,6 +492,9 @@ const getUnassignedStudents = (req, res) => __awaiter(void 0, void 0, void 0, fu
             where: {
                 hostelId,
                 roomId: null,
+                user: {
+                    isActive: true
+                }
             },
             include: {
                 user: {
@@ -484,3 +519,82 @@ const getUnassignedStudents = (req, res) => __awaiter(void 0, void 0, void 0, fu
     }
 });
 exports.getUnassignedStudents = getUnassignedStudents;
+const getInactiveStudents = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
+        const page = parseInt(req.query.page) || 1;
+        const limit = 15;
+        const skip = (page - 1) * limit;
+        const whereCondition = {
+            hostelId,
+            role: "STUDENT",
+            isActive: false,
+        };
+        const total = yield prisma.user.count({
+            where: whereCondition,
+        });
+        const students = yield prisma.user.findMany({
+            where: whereCondition,
+            skip,
+            take: limit,
+            orderBy: {
+                createdAt: "desc",
+            },
+            select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { student: {
+                    select: {
+                        id: true,
+                        regNo: true,
+                    },
+                }, hostel: {
+                    select: {
+                        name: true,
+                    },
+                } }),
+        });
+        return res.status(200).json({
+            students,
+            total,
+            page,
+            limit,
+        });
+    }
+    catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            msg: "Internal server error",
+        });
+    }
+});
+exports.getInactiveStudents = getInactiveStudents;
+const getInactiveWardens = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    try {
+        const hostelId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.hostelId;
+        if (!hostelId) {
+            return res.status(400).json({ msg: "Hostel ID missing" });
+        }
+        const wardens = yield prisma.user.findMany({
+            where: {
+                hostelId,
+                role: "WARDEN",
+                isActive: false,
+            },
+            select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { hostel: {
+                    select: {
+                        name: true,
+                    },
+                } }),
+            orderBy: {
+                name: "asc",
+            },
+        });
+        return res.status(200).json({ wardens });
+    }
+    catch (e) {
+        return res.status(500).json({
+            msg: "Internal Server error!!",
+        });
+    }
+});
+exports.getInactiveWardens = getInactiveWardens;

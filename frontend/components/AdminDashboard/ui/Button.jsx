@@ -22,13 +22,13 @@ export default function Button({
   const sizes = {
     sm: "px-3 py-1.5 text-sm",
     md: "px-5 py-2.5 text-base",
-    lg: "px-8 py-3.5 text-lg",
+    lg: "px-8 py-3 text-lg",
   };
 
   return (
     <motion.button
       whileTap={{ scale: 0.98 }} onClick={onClick}
-      className={`rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+      className={`rounded-xl font-medium transition-all duration-200 flex items-center justify-center gap-2 cursor-pointer ${
         variants[variant]
       } ${sizes[size]} ${className}`}
       {...props}

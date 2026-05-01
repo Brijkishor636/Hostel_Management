@@ -47,7 +47,8 @@ model Student {
   hostel   Hostel @relation(fields: [hostelId], references: [id], onDelete: Cascade)
   room     Room?  @relation(fields: [roomId], references: [id])
 
-  payments   Payment[]
+  invoices   Invoice[]
+  payments   PaymentTransaction[]
   complaints Complaint[]
   visitors   Visitor[]
 
@@ -68,6 +69,9 @@ model Room {
   @@unique([hostelId, number])
 }
 
+/////////////////////////
+// 🔹 CHARGE SYSTEM
+/////////////////////////
 
 model ChargeType {
   id          String @id @default(uuid())
@@ -82,10 +86,10 @@ model Charge {
   hostelId     String
   chargeTypeId String
 
-  amount       Int
+  baseAmount Int @default(0)
 
   frequency    ChargeFrequency
-  interval     Int     
+  interval     Int   
 
   startDate    DateTime
   endDate      DateTime?
@@ -93,38 +97,59 @@ model Charge {
   hostel     Hostel     @relation(fields: [hostelId], references: [id], onDelete: Cascade)
   chargeType ChargeType @relation(fields: [chargeTypeId], references: [id])
 
-  payments   Payment[]
+  invoices   Invoice[]
 }
 
-model Payment {
-  id        String        @id @default(uuid())
+
+
+model Invoice {
+  id        String   @id @default(uuid())
   studentId String
   chargeId  String
 
-  amount    Int
-  dueDate   DateTime
-  paidAt    DateTime?
+  totalAmount   Int
+  paidAmount    Int      @default(0)
+  remaining     Int
 
-  status    PaymentStatus @default(PENDING)
+  dueDate       DateTime
 
-  paymentMethod String?
-  transactionId String?
+  status        InvoiceStatus @default(PENDING)
 
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
   charge  Charge  @relation(fields: [chargeId], references: [id])
 
+  payments PaymentTransaction[]
+
   createdAt DateTime @default(now())
 }
 
-//////////////////////
+
+
+model PaymentTransaction {
+  id         String   @id @default(uuid())
+  studentId  String
+  invoiceId  String
+
+  amount     Int
+  paidAt     DateTime @default(now())
+
+  method     String?
+  reference  String?
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
 
 model Complaint {
-  id        String            @id @default(uuid())
+  id        String              @id @default(uuid())
   studentId String
-  message   String
-  status    ComplaintStatus   @default(PENDING)
-  createdAt DateTime          @default(now())
+  title     String          
+  message   String             
+  status    ComplaintStatus     @default(PENDING)
+  priority  ComplaintPriority   @default(MEDIUM)
 
+  createdAt DateTime            @default(now())
   student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
 }
 
@@ -152,17 +177,12 @@ enum RoomStatus {
   MAINTENANCE
 }
 
-enum PaymentStatus {
-  PAID
-  PENDING
-  FAILED
-}
-
 enum ComplaintStatus {
   PENDING
   IN_PROGRESS
   RESOLVED
 }
+
 
 enum ChargeFrequency {
   ONE_TIME
@@ -170,4 +190,16 @@ enum ChargeFrequency {
   QUARTERLY
   YEARLY
   CUSTOM
+}
+
+enum InvoiceStatus {
+  PENDING
+  PARTIAL
+  PAID
+}
+
+enum ComplaintPriority {
+  LOW
+  MEDIUM
+  HIGH
 }

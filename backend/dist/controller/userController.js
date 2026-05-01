@@ -8,17 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -53,12 +42,18 @@ const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         if (!secretKey) {
             return res.status(500).json({ msg: "JWT secret not configured" });
         }
-        const token = jsonwebtoken_1.default.sign({ userId: user.id, role: user.role, hostelId: user.hostelId }, secretKey, { expiresIn: "1h" });
+        const token = jsonwebtoken_1.default.sign({ userId: user.id, role: user.role, hostelId: user.hostelId, isActive: user.isActive }, secretKey, { expiresIn: "1h" });
         res.cookie("token", token, {
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
-            maxAge: 24 * 60 * 60 * 1000
+            maxAge: 60 * 60 * 1000
+        });
+        res.cookie("role", user.role, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 60 * 60 * 1000
         });
         return res.status(200).json({
             msg: "Login successful",
@@ -89,16 +84,19 @@ const currentUser = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const user = yield prisma.user.findFirst({
             where: {
                 id: data.userId
-            }
+            }, select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { hostel: {
+                    select: {
+                        name: true
+                    }
+                } })
         });
         if (!user) {
             return res.status(404).json({
                 msg: "User not found",
             });
         }
-        const { password } = user, userWithoutPassword = __rest(user, ["password"]);
         return res.status(200).json({
-            user: userWithoutPassword,
+            user,
         });
     }
     catch (error) {
@@ -110,6 +108,12 @@ const currentUser = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 exports.currentUser = currentUser;
 const logout = (req, res) => {
     res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/"
+    });
+    res.clearCookie("role", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",

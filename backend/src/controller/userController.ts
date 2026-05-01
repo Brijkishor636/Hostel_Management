@@ -34,7 +34,7 @@ export const signin = async (req: Request, res: Response) => {
     }
 
     const token = jwt.sign(
-      { userId: user.id, role: user.role, hostelId: user.hostelId },
+      { userId: user.id, role: user.role, hostelId: user.hostelId, isActive: user.isActive },
       secretKey,
       { expiresIn: "1h" }
     );
@@ -43,7 +43,14 @@ export const signin = async (req: Request, res: Response) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000
+      maxAge: 60 * 60 * 1000
+    });
+
+    res.cookie("role", user.role, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 1000
     });
 
     return res.status(200).json({
@@ -75,6 +82,13 @@ export const currentUser = async(req: Request, res: Response) =>{
   const user = await prisma.user.findFirst({
     where: {
       id: data.userId
+    },select:{
+      ...safeUserSelect,
+      hostel: {
+        select: {
+          name: true
+        }
+      }
     }
   })
   if (!user) {
@@ -82,9 +96,8 @@ export const currentUser = async(req: Request, res: Response) =>{
         msg: "User not found",
       });
     }
-    const { password, ...userWithoutPassword } = user;
     return res.status(200).json({
-      user: userWithoutPassword,
+      user,
     });
   }
    catch (error) {
@@ -97,6 +110,13 @@ export const currentUser = async(req: Request, res: Response) =>{
 
 export const logout = (req: Request, res: Response) =>{
     res.clearCookie("token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/"
+    });
+
+    res.clearCookie("role", {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",

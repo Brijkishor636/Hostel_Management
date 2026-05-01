@@ -1,9 +1,12 @@
 import express, {Request, Response} from "express"
-import { createStudent, getSingleStudent, getStudents, updateStudent } from "../controller/adminController";
+import { createStudent, deleteStudent, getInactiveStudents, getSingleStudent, getStudents, getUnassignedStudents, updateStudent } from "../controller/adminController";
 import { verifyToken } from "../middlewares/authMiddleware";
 import { authorizeRole } from "../middlewares/roleMiddleware";
 import { getSelfDetails, updateSelfProfile } from "../controller/userController";
-import { allocateRoom, createRooms, deleteRoom, getAllRooms, getSingleRoom, updateRoom } from "../controller/roomController";
+import { allocateRoom, createRooms, deleteRoom, getAllRooms, getRooms, getSingleRoom, updateRoom } from "../controller/roomController";
+import { getAllStudents, inactiveStudent, removeStudent } from "../controller/admin/studentController";
+import { createCharge, createChargeType, generateInvoiceForStudent, getAllStudentsWithDues, getDashboardSummary, getStudentPayments, getStudentTransactions, payInvoice } from "../controller/paymentController";
+import { getAllComplaints, getComplaintById, updateComplaintPriority, updateComplaintStatus } from "../controller/admin/complaintController";
 
 const wardenRouter = express.Router();
 
@@ -26,12 +29,44 @@ wardenRouter.post("/rooms/allocate", (req: Request, res: Response) => allocateRo
 
 wardenRouter.post("/rooms/create", (req: Request, res: Response) => createRooms(req, res));
 
-wardenRouter.get("/rooms", (req: Request, res: Response) => getAllRooms(req, res));
+wardenRouter.get("/rooms", (req: Request, res: Response) => getRooms(req, res));
 
-wardenRouter.get("/rooms/:roomNo", (req: Request, res: Response) => getSingleRoom(req, res));
+wardenRouter.get("/rooms/:id", (req: Request, res: Response) => getSingleRoom(req, res));
 
-wardenRouter.put("/rooms/update/:roomNum", (req: Request, res: Response) => updateRoom(req, res));
+wardenRouter.put("/rooms/update/:id", (req: Request, res: Response) => updateRoom(req, res));
 
-wardenRouter.delete("/rooms/:roomNo", (req: Request, res: Response) => deleteRoom(req, res));
+wardenRouter.delete("/rooms/:id", (req: Request, res: Response) => deleteRoom(req, res));
+
+wardenRouter.put("/rooms/remove-student/:studentId", (req: Request, res: Response) =>
+  removeStudent(req, res)
+);
+wardenRouter.get("/unassigned-student", (req: Request, res: Response) => getUnassignedStudents(req, res));
+
+
+
+wardenRouter.get("/inactive-students", (req: Request, res: Response) => getInactiveStudents(req, res));
+wardenRouter.put("/inactive/:id", (req: Request, res: Response) => inactiveStudent(req, res));
+wardenRouter.delete("/student/:id", (req: Request, res: Response) => deleteStudent(req, res));
+
+wardenRouter.get("/allstudents", (req: Request, res: Response) => getAllStudents(req, res));
+wardenRouter.get("/allrooms", (req: Request, res: Response) => getAllRooms(req, res));
+
+
+
+wardenRouter.get("/student-payments/:studentId", getStudentPayments);
+wardenRouter.post("/charge", createCharge);
+wardenRouter.post("/invoice", generateInvoiceForStudent);
+wardenRouter.post("/pay", payInvoice);
+wardenRouter.get("/summary", getDashboardSummary);
+wardenRouter.get("/students-dues", getAllStudentsWithDues);
+wardenRouter.post("/charge-type", createChargeType);
+wardenRouter.get("/student-transactions/:studentId", getStudentTransactions);
+
+
+
+wardenRouter.get("/complaints", getAllComplaints);
+wardenRouter.get("/complaints/:id", getComplaintById);
+wardenRouter.patch("/complaints/:id/status", updateComplaintStatus);
+wardenRouter.patch("/complaints/:id/priority", updateComplaintPriority);
 
 export default wardenRouter;

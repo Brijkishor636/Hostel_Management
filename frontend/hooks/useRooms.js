@@ -1,28 +1,25 @@
-import { useContext, useEffect, useState } from "react";
-import UserContext from "../context/UserContext";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
 const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-export const useRooms = ({ role, page = 1, limit = 12 }) => {
-  const { user } = useContext(UserContext);
-
+export const useRooms = ({ role, page = 1, limit = 8 }) => {
   const [rooms, setRooms] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [refresh, setRefresh] = useState(false);
-
-  const finalRole = role || user?.role?.toLowerCase();
 
   useEffect(() => {
-    if (!finalRole) return;
+    if (!role) {
+      setLoading(false);
+      return;
+    }
 
     const fetchRooms = async () => {
       try {
         setLoading(true);
 
         const res = await axios.get(
-          `${url}/api/v1/${finalRole}/rooms?page=${page}&limit=${limit}`,
+          `${url}/api/v1/${role}/rooms?page=${page}&limit=${limit}`,
           {
             withCredentials: true,
           }
@@ -32,16 +29,16 @@ export const useRooms = ({ role, page = 1, limit = 12 }) => {
 
         setRooms(data.rooms || []);
         setTotal(data.total || 0);
-
       } catch (err) {
-        console.error("AXIOS ERROR:", err);
+        console.error("AXIOS ERROR:", err.response?.data || err.message);
+        setRooms([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchRooms();
-  }, [finalRole, page, limit, refresh]);
+  }, [role, page, limit]);
 
-  return { rooms, total, loading, setRefresh };
+  return { rooms, total, loading };
 };

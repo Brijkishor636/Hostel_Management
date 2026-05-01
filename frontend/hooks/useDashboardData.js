@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-export const useDashboardData = (role = "admin") => {
+export const useDashboardData = (role) => {
   const [students, setStudents] = useState([]);
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -16,10 +16,10 @@ export const useDashboardData = (role = "admin") => {
         setLoading(true);
 
         const [studentRes, roomRes] = await Promise.all([
-              fetch(`${url}/api/v1/${role}/students`, {
+              fetch(`${url}/api/v1/${role}/allstudents`, {
                 credentials: "include",
               }),
-              fetch(`${url}/api/v1/${role}/rooms`, {
+              fetch(`${url}/api/v1/${role}/allrooms`, {
                 credentials: "include",
               }),
             ]);
@@ -41,7 +41,7 @@ export const useDashboardData = (role = "admin") => {
 
   const totalStudents = students.length;
   const totalRooms = rooms.length;
-  const occupiedRooms = rooms.filter(r => r.isOccupied).length;
+  const occupiedRooms = rooms.filter(r => r.occupancy > 0).length;
 
   return {
     students,
