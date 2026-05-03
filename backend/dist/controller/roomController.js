@@ -44,7 +44,7 @@ const allocateRoom = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         if (!room) {
             return res.status(404).json({ msg: "Room not found" });
         }
-        if (room.status === "MAINTENANCE") {
+        if (room.status === client_1.RoomStatus.MAINTENANCE) {
             return res.status(400).json({
                 msg: "Room is under maintenance",
             });
@@ -64,8 +64,8 @@ const allocateRoom = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 data: {
                     occupancy: { increment: 1 },
                     status: room.occupancy + 1 >= room.capacity
-                        ? "FULL"
-                        : "AVAILABLE",
+                        ? client_1.RoomStatus.FULL
+                        : client_1.RoomStatus.AVAILABLE,
                 },
             }),
         ]);
@@ -212,12 +212,12 @@ const updateRoom = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             });
         }
         const newCapacity = parsed.data.capacity;
-        let newStatus = "AVAILABLE";
-        if (existRoom.status === "MAINTENANCE") {
-            newStatus = "MAINTENANCE";
+        let newStatus = client_1.RoomStatus.AVAILABLE;
+        if (existRoom.status === client_1.RoomStatus.MAINTENANCE) {
+            newStatus = client_1.RoomStatus.MAINTENANCE;
         }
         else if (existRoom.occupancy >= newCapacity) {
-            newStatus = "FULL";
+            newStatus = client_1.RoomStatus.FULL;
         }
         const updatedRoom = yield prisma.room.update({
             where: { id: existRoom.id },

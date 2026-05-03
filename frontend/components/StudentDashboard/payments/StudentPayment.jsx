@@ -4,6 +4,7 @@ import StatCard from "./StatCard";
 import RevenueChart from "./RevenueChart";
 import { usePaymentDashboard } from "../../../hooks/usePaymentDashboard";
 import { useStudentRoom } from "../../../hooks/useStudentRoom";
+import StudentTransactions from "./StudentTransactions";
 
 export default function StudentPayment() {
   const {
@@ -22,10 +23,7 @@ export default function StudentPayment() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e1b4b] text-white p-4 md:p-6">
-
       <div className="space-y-6">
-
-        {/* Header */}
         <div>
           <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent">
             Payments
@@ -35,7 +33,6 @@ export default function StudentPayment() {
           </p>
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           
           <StatCard
@@ -59,9 +56,9 @@ export default function StudentPayment() {
           />
         </div>
 
-        {/* Chart */}
         <RevenueChart transactions={transactions} />
 
+        <StudentTransactions/>
       </div>
     </div>
   );

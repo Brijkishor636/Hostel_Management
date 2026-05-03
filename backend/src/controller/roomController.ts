@@ -1,6 +1,6 @@
 import {Request, Response} from "express"
-import { allocateRoomsInput, createRoomsInput, updateRoomInput } from "../inputs/roomsInput"
-import { PrismaClient } from "@prisma/client";
+import { createRoomsInput, updateRoomInput } from "../inputs/roomsInput"
+import { PrismaClient, RoomStatus } from "@prisma/client";
 import { safeRoomSelector } from "../selectors/roomSelector";
 
 const prisma = new PrismaClient();
@@ -39,7 +39,7 @@ export const allocateRoom = async (req: Request, res: Response) => {
       return res.status(404).json({ msg: "Room not found" });
     }
 
-    if (room.status === "MAINTENANCE") {
+    if (room.status === RoomStatus.MAINTENANCE) {
       return res.status(400).json({
         msg: "Room is under maintenance",
       });
@@ -62,8 +62,8 @@ export const allocateRoom = async (req: Request, res: Response) => {
           occupancy: { increment: 1 },
           status:
             room.occupancy + 1 >= room.capacity
-              ? "FULL"
-              : "AVAILABLE",
+              ? RoomStatus.FULL
+              : RoomStatus.AVAILABLE,
         },
       }),
     ]);
@@ -211,7 +211,6 @@ export const updateRoom = async (req: Request, res: Response) => {
   try {
     const parsed = updateRoomInput.safeParse(req.body);
     const id = req.params.id;
-
     if (!parsed.success) {
       return res.status(400).json({
         msg: "Invalid inputs!!",
@@ -232,18 +231,18 @@ export const updateRoom = async (req: Request, res: Response) => {
 
     const newCapacity = parsed.data.capacity;
 
-    let newStatus = "AVAILABLE";
+    let newStatus: RoomStatus = RoomStatus.AVAILABLE;
 
-    if (existRoom.status === "MAINTENANCE") {
-      newStatus = "MAINTENANCE";
+    if (existRoom.status === RoomStatus.MAINTENANCE) {
+      newStatus = RoomStatus.MAINTENANCE;
     } else if (existRoom.occupancy >= newCapacity) {
-      newStatus = "FULL";
+      newStatus = RoomStatus.FULL;
     }
     const updatedRoom = await prisma.room.update({
       where: { id: existRoom.id },
       data: {
         capacity: newCapacity,
-        status: newStatus,
+        status: newStatus as RoomStatus,
       }
     });
 

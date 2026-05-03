@@ -11,7 +11,7 @@ export function middleware(request) {
   const isProtectedRoute =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/warden") ||
-    pathname.startsWith("/st_dashboard");
+    pathname.startsWith("/student");
 
   const isLoggedIn = token;
 
@@ -24,8 +24,8 @@ export function middleware(request) {
   }
 
   if (isLoggedIn && role === "student") {
-    if (!pathname.startsWith("/st_dashboard")) {
-      return NextResponse.redirect(new URL("/st_dashboard", request.url));
+    if (!pathname.startsWith("/student")) {
+      return NextResponse.redirect(new URL("/student", request.url));
     }
   }
 
@@ -48,6 +48,6 @@ export const config = {
     "/login",
     "/admin/:path*",
     "/warden/:path*",
-    "/st_dashboard/:path*",
+    "/student/:path*",
   ],
 };
