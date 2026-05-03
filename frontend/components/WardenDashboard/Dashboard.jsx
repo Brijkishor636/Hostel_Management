@@ -12,10 +12,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { AlertCircle, Activity } from "lucide-react";
-import { MOCK_COMPLAINTS } from "../constants";
 import { usePathname } from "next/navigation";
 import { useDashboardData } from "../../hooks/useDashboardData";
-import StatCardWrapper from "./common/StatCardWrapper"
+import StatCardWrapper from "./common/StatCardWrapper";
 
 const chartData = [
   { name: "Mon", checkins: 60 },
@@ -34,6 +33,8 @@ const WardenDashboard = () => {
     totalStudents,
     totalRooms,
     occupiedRooms,
+    recentComplaints,
+    openComplaints,
     loading,
   } = useDashboardData(role);
 
@@ -49,7 +50,8 @@ const WardenDashboard = () => {
           totalStudents={totalStudents}
           totalRooms={totalRooms}
           occupiedRooms={occupiedRooms}
-        />
+          openComplaints={openComplaints}       
+          />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -61,7 +63,7 @@ const WardenDashboard = () => {
               Weekly Attendance
             </h3>
 
-            <select className="bg-white/5 border border-white/10 rounded-xl text-sm px-3 py-2 text-gray-300 backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+            <select className="bg-white/5 border border-white/10 rounded-xl text-sm px-3 py-2 text-gray-300 backdrop-blur-md">
               <option>This Week</option>
               <option>Last Week</option>
             </select>
@@ -78,23 +80,15 @@ const WardenDashboard = () => {
                 </defs>
 
                 <CartesianGrid strokeDasharray="3 3" stroke="#1f2937" vertical={false} />
-                <XAxis dataKey="name" stroke="#9ca3af" axisLine={false} tickLine={false} />
-                <YAxis stroke="#9ca3af" axisLine={false} tickLine={false} />
+                <XAxis dataKey="name" stroke="#9ca3af" />
+                <YAxis stroke="#9ca3af" />
 
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#020617",
-                    border: "1px solid #1f2937",
-                    borderRadius: "14px",
-                  }}
-                />
+                <Tooltip />
 
                 <Area
                   type="monotone"
                   dataKey="checkins"
                   stroke="#8b5cf6"
-                  strokeWidth={3}
-                  fillOpacity={1}
                   fill="url(#colorAttendance)"
                 />
               </AreaChart>
@@ -109,19 +103,21 @@ const WardenDashboard = () => {
           </h3>
 
           <div className="space-y-4">
-            {MOCK_COMPLAINTS.map((complaint) => (
+            {recentComplaints.map((complaint) => (
               <div
                 key={complaint.id}
                 className="p-4 rounded-xl border border-white/10 bg-white/5 backdrop-blur-md hover:bg-white/10 transition"
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-medium text-sm text-gray-200">
-                    {complaint.subject}
+                    {complaint.title}
                   </h4>
 
                   <Badge
                     variant={
-                      complaint.priority === "High" ? "error" : "warning"
+                      complaint.priority === "HIGH"
+                        ? "error"
+                        : "warning"
                     }
                   >
                     {complaint.priority}
@@ -129,11 +125,14 @@ const WardenDashboard = () => {
                 </div>
 
                 <p className="text-xs text-gray-400 mb-3">
-                  From: {complaint.studentName} (Room {complaint.room})
+                  From: {complaint.student?.user?.name} (Room{" "}
+                  {complaint.student?.room?.number || "N/A"})
                 </p>
 
                 <div className="flex justify-between items-center text-[11px] text-gray-500">
-                  <span>{complaint.date}</span>
+                  <span>
+                    {new Date(complaint.createdAt).toLocaleDateString()}
+                  </span>
 
                   <button className="text-indigo-400 hover:text-indigo-300 transition">
                     Resolve →

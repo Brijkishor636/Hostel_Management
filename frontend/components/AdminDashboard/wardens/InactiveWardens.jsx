@@ -3,16 +3,18 @@
 import React from "react";
 import Card from "../ui/Cards";
 import { UserPlus } from "lucide-react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useInactiveWardens } from "../../../hooks/useInactiveWardens";
 import axios from "axios";
 import { toast } from "react-toastify";
+import Button from "../ui/Button";
 
 const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export default function InactiveWardens() {
 
   const pathname = usePathname();
+  const router = useRouter();
   const role = pathname.startsWith("/warden") ? "warden" : "admin";
 
   const { wardens, loading, setRefresh } = useInactiveWardens({ role });
@@ -43,8 +45,9 @@ export default function InactiveWardens() {
   if (loading) return <p className="text-white p-6">Loading...</p>;
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e1b4b] text-white p-4 space-y-10">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e1b4b] text-white p-4 space-y-6">
 
+    <div className="flex justify-between">
       <div>
         <h2 className="text-xl sm:text-3xl font-bold flex items-center gap-3">
           <UserPlus className="text-indigo-400 w-6 h-6 sm:w-8 sm:h-8" />
@@ -54,6 +57,12 @@ export default function InactiveWardens() {
           List of all inactive wardens in the hostel.
         </p>
       </div>
+      <div className="flex justify-between items-center">
+              <Button size="sm" className="bg-indigo-300 hover:bg-indigo-700 text-white" onClick={() => router.back()}>
+                ← Back
+              </Button>
+          </div>
+        </div>
 
       <Card className="!p-0 overflow-hidden border-white/10 bg-white/5 backdrop-blur-md">
 

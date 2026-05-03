@@ -6,6 +6,7 @@ import { useParams, useRouter, usePathname } from "next/navigation";
 import { Users, BedDouble } from "lucide-react";
 import StatusDropdown from "./StatusDropdown";
 import { toast } from "react-toastify";
+import Button from "../ui/Button";
 
 const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -75,7 +76,12 @@ export default function RoomDetailsPage() {
     (room.occupancy / room.capacity) * 100;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e1b4b] text-white p-6 space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e1b4b] text-white p-6 space-y-6">
+        <div className="flex justify-between items-center">
+        <Button size="sm" className="bg-indigo-300 hover:bg-indigo-700 text-white" onClick={() => router.back()}>
+          ← Back
+        </Button>
+      </div>
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>

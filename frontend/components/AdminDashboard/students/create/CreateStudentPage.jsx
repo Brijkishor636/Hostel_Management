@@ -5,13 +5,15 @@ import { useForm } from "react-hook-form";
 import { Loader2 } from "lucide-react";
 import InputField from "../../ui/InputField";
 import { toast } from "react-toastify";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import Button from "../../ui/Button";
 
 export default function CreateStudentPage() {
   const [isLoading, setIsLoading] = useState(false);
 
   const pathname = usePathname();
   const role = pathname.split("/")[1];
+  const router = useRouter();
 
   const {
     register,
@@ -69,7 +71,11 @@ export default function CreateStudentPage() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-2 md:p-5 lg:p-8 bg-slate-950 text-slate-100">
       <div className="w-full md:max-w-4xl lg:max-w-7xl animate-in fade-in zoom-in duration-500">
-        
+        <div className="flex justify-between items-center mb-6">
+              <Button size="sm" className="bg-indigo-300 hover:bg-indigo-700 text-white" onClick={() => router.back()}>
+                ← Back
+              </Button>
+          </div>
         <div className="bg-slate-900 border border-slate-800 hover:shadow-md rounded-3xl shadow-xl p-8 md:p-12">
           
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-y-8">

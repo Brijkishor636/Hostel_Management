@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams, usePathname } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { toast } from "react-toastify";
+import Button from "../ui/Button";
 
 const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -12,6 +13,7 @@ export default function Unassigned_Students() {
   const pathname = usePathname();
 
   const role = pathname.split("/")[1];
+  const router = useRouter();
 
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -61,8 +63,13 @@ export default function Unassigned_Students() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#020617] via-[#0f172a] to-[#1e1b4b] text-white p-4 md:p-8">
+        <div className="flex justify-between items-center">
+                <Button size="sm" className="bg-indigo-300 hover:bg-indigo-700 text-white" onClick={() => router.back()}>
+                  ← Back
+                </Button>
+            </div>
 
-      <h1 className="text-2xl md:text-3xl font-bold mb-6">
+      <h1 className="text-2xl md:text-3xl font-bold mb-6 mt-4">
         Unassigned Students
       </h1>
 

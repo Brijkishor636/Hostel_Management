@@ -56,10 +56,10 @@ export default function Navbar() {
           </h1>
         </Link>
 
-        {/* ✅ show only when user exists */}
+        {/* show only when user exists */}
         {user && role && (
-          <div className="hidden md:flex gap-10 text-gray-700 font-medium">
-            {["Dashboard", "Rooms", "Students", "Complaints"].map((item, i) => (
+          <div className="hidden md:flex gap-10 font-medium">
+            {["Dashboard", "Rooms", "Payments", "Complaints"].map((item, i) => (
               <Link
                 key={i}
                 href={
@@ -67,7 +67,7 @@ export default function Navbar() {
                     ? `${baseRoute}`
                     : `${baseRoute}/${item.toLowerCase()}`
                 }
-                className="relative group"
+                className="relative group bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent"
               >
                 {item}
                 <span className="absolute left-0 -bottom-1 w-0 h-[3px] bg-gradient-to-r from-pink-500 to-purple-600 transition-all group-hover:w-full"></span>
@@ -132,7 +132,7 @@ export default function Navbar() {
         <div className="md:hidden bg-white/90 backdrop-blur-lg px-6 py-4 space-y-3 shadow-lg">
 
           {user && role &&
-            ["Dashboard", "Rooms", "Students", "Complaints"].map((item, i) => (
+            ["Dashboard", "Rooms", "Payments", "Complaints"].map((item, i) => (
               <Link
                 key={i}
                 href={

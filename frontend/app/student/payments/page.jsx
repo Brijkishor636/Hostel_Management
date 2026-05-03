@@ -1,11 +1,7 @@
-import React from 'react'
+import StudentPayment from "../../../components/StudentDashboard/payments/StudentPayment";
 
-const page = () => {
-  return (
-    <div>
-      
-    </div>
-  )
+export default function Page(){
+  return <div>
+    <StudentPayment/>
+  </div>
 }
-
-export default page

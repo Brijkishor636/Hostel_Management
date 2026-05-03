@@ -9,6 +9,8 @@ import InputField from "../../ui/InputField";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify"; // ✅ added
 import "react-toastify/dist/ReactToastify.css"; // ✅ added
+import Button from "../../ui/Button";
+import { useRouter } from "next/navigation";
 
 const url = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -21,6 +23,7 @@ const wardenSchema = z.object({
 
 export default function CreateWardenPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const {
     register,
@@ -62,6 +65,11 @@ export default function CreateWardenPage() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-2 md:p-5 lg:p-8 bg-slate-950 text-slate-100">
       <div className="w-full md:max-w-4xl lg:max-w-7xl animate-in fade-in zoom-in duration-500">
+        <div className="flex justify-between items-center mb-6">
+              <Button size="sm" className="bg-indigo-300 hover:bg-indigo-700 text-white" onClick={() => router.back()}>
+                ← Back
+              </Button>
+          </div>
         <div className="bg-slate-900 border border-slate-800 hover:shadow-md rounded-3xl shadow-xl p-8 md:p-12">
           <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-y-8">
             <h1 className="text-3xl font-extrabold text-white tracking-tight text-center md:text-left">

@@ -3,7 +3,7 @@ import React from "react";
 import StatCard from "./StatCard";
 import { Users, BedDouble, ClipboardList, AlertCircle } from "lucide-react";
 
-const StatCardWrapper = ({ totalStudents, totalRooms, occupiedRooms }) => {
+const StatCardWrapper = ({ totalStudents, totalRooms, occupiedRooms, openComplaints }) => {
   return (
     <>
       <StatCard
@@ -27,7 +27,7 @@ const StatCardWrapper = ({ totalStudents, totalRooms, occupiedRooms }) => {
       <StatCard
         link={"/warden/complaints"}
         title="Pending Complaints"
-        value="7"
+        value={`${openComplaints}`}
         icon={<AlertCircle size={24} />}
         trend="-1%"
         color="rose"
