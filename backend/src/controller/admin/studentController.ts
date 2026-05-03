@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, RoomStatus } from "@prisma/client";
 import { Request, Response } from "express";
 import { safeUserSelect } from "../../selectors/userSelector";
 
@@ -85,12 +85,12 @@ export const removeStudent = async (req: Request, res: Response) => {
 
     const newOccupancy = room.occupancy - 1;
 
-    let newStatus = "AVAILABLE";
+    let newStatus: RoomStatus = RoomStatus.AVAILABLE;
 
-    if (room.status === "MAINTENANCE") {
-      newStatus = "MAINTENANCE";
+    if (room.status === RoomStatus.MAINTENANCE) {
+      newStatus = RoomStatus.MAINTENANCE;
     } else if (newOccupancy >= room.capacity) {
-      newStatus = "FULL";
+      newStatus = RoomStatus.FULL;
     }
 
     await prisma.room.update({

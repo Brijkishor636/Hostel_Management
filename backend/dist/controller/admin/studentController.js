@@ -83,12 +83,12 @@ const removeStudent = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             });
         }
         const newOccupancy = room.occupancy - 1;
-        let newStatus = "AVAILABLE";
-        if (room.status === "MAINTENANCE") {
-            newStatus = "MAINTENANCE";
+        let newStatus = client_1.RoomStatus.AVAILABLE;
+        if (room.status === client_1.RoomStatus.MAINTENANCE) {
+            newStatus = client_1.RoomStatus.MAINTENANCE;
         }
         else if (newOccupancy >= room.capacity) {
-            newStatus = "FULL";
+            newStatus = client_1.RoomStatus.FULL;
         }
         yield prisma.room.update({
             where: { id: roomId },
