@@ -6,11 +6,18 @@ import StatCard from "../../components/StudentDashboard/StatCard";
 import RevenueChart from "../../components/StudentDashboard/RevenueChart";
 
 import { useDashboard } from "../../hooks/useDashboard";
+
 export default function StDashboard() {
   const { data, loading } = useDashboard();
 
+  
   if (loading) {
     return <p className="text-white p-10">Loading...</p>;
+  }
+
+
+  if (!data) {
+    return <p className="text-red-500 p-10">Failed to load dashboard</p>;
   }
 
   return (
@@ -22,14 +29,14 @@ export default function StDashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <StatCard title="Room Number" value={data?.roomNumber} />
-          <StatCard title="Monthly Rent" value={`₹${data?.rent}`} />
-          <StatCard title="Pending Dues" value={`₹${data?.pendingDues}`} />
-          <StatCard title="Open Complaints" value={data?.complaints} />
+          <StatCard title="Room Number" value={data.roomNumber || "N/A"} />
+          <StatCard title="Monthly Rent" value={`₹${data.rent || 0}`} />
+          <StatCard title="Pending Dues" value={`₹${data.pendingDues || 0}`} />
+          <StatCard title="Open Complaints" value={data.complaints || 0} />
         </div>
 
         {/* Chart */}
-        <RevenueChart data={data?.paymentHistory || []} />
+        <RevenueChart data={data.paymentHistory || []} />
       </div>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const url = process.env.NEXT_PUBLIC_BACKEND_URL;
+const url = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
 export const useRooms = ({ role, page = 1, limit = 8 }) => {
   const [rooms, setRooms] = useState([]);
