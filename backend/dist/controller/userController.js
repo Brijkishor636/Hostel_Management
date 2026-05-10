@@ -21,49 +21,42 @@ const authInput_1 = require("../inputs/authInput");
 const userSelector_1 = require("../selectors/userSelector");
 const selfInput_1 = require("../inputs/selfInput");
 const prisma = new client_1.PrismaClient();
+const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none",
+    maxAge: 60 * 60 * 1000,
+    path: "/",
+};
 const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const parsed = authInput_1.signinInput.safeParse(req.body);
-        // console.log(parsed.data);
         if (!parsed.success) {
-            return res.status(400).json({
-                msg: "Invalid input data"
-            });
+            return res.status(400).json({ msg: "Invalid input data" });
         }
         const user = yield prisma.user.findFirst({
-            where: { email: parsed.data.email }
+            where: { email: parsed.data.email },
         });
         if (!user || !(yield bcryptjs_1.default.compare(parsed.data.password, user.password))) {
-            return res.status(401).json({
-                msg: "Invalid email or password"
-            });
+            return res.status(401).json({ msg: "Invalid email or password" });
         }
         const secretKey = process.env.JWT_SECRET;
-        if (!secretKey) {
-            return res.status(500).json({ msg: "JWT secret not configured" });
-        }
-        const token = jsonwebtoken_1.default.sign({ userId: user.id, role: user.role, hostelId: user.hostelId, isActive: user.isActive }, secretKey, { expiresIn: "1h" });
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 60 * 60 * 1000
-        });
-        res.cookie("role", user.role, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "strict",
-            maxAge: 60 * 60 * 1000
-        });
+        const token = jsonwebtoken_1.default.sign({
+            userId: user.id,
+            role: user.role,
+            hostelId: user.hostelId,
+            isActive: user.isActive,
+        }, secretKey, { expiresIn: "1h" });
+        res.cookie("token", token, cookieOptions);
+        res.cookie("role", user.role, cookieOptions);
         return res.status(200).json({
             msg: "Login successful",
             role: user.role,
             dashboard: (0, roleDashboard_1.getDashboardForRole)(user.role),
-            user
+            user,
         });
     }
-    catch (error) {
-        console.error(error);
+    catch (_a) {
         return res.status(500).json({ msg: "Internal server error" });
     }
 });
@@ -72,56 +65,28 @@ const currentUser = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     try {
         const token = req.cookies.token;
         if (!token) {
-            return res.status(401).json({
-                msg: "no token, authorization denied"
-            });
+            return res.status(401).json({ msg: "no token, authorization denied" });
         }
         const secretKey = process.env.JWT_SECRET;
-        if (!secretKey) {
-            return res.status(500).json({ msg: "JWT secret not configured" });
-        }
         const data = jsonwebtoken_1.default.verify(token, secretKey);
         const user = yield prisma.user.findFirst({
-            where: {
-                id: data.userId
-            }, select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { hostel: {
-                    select: {
-                        name: true
-                    }
-                } })
+            where: { id: data.userId },
+            select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { hostel: { select: { name: true } } }),
         });
         if (!user) {
-            return res.status(404).json({
-                msg: "User not found",
-            });
+            return res.status(404).json({ msg: "User not found" });
         }
-        return res.status(200).json({
-            user,
-        });
+        return res.status(200).json({ user });
     }
-    catch (error) {
-        return res.status(401).json({
-            msg: "Invalid or expired token",
-        });
+    catch (_a) {
+        return res.status(401).json({ msg: "Invalid or expired token" });
     }
 });
 exports.currentUser = currentUser;
 const logout = (req, res) => {
-    res.clearCookie("token", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        path: "/"
-    });
-    res.clearCookie("role", {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        path: "/"
-    });
-    return res.status(200).json({
-        msg: "Logged out successfully"
-    });
+    res.clearCookie("token", cookieOptions);
+    res.clearCookie("role", cookieOptions);
+    return res.status(200).json({ msg: "Logged out successfully" });
 };
 exports.logout = logout;
 const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -130,43 +95,27 @@ const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
         const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.userId;
         const { oldPassword, newPassword } = req.body;
         if (!oldPassword || !newPassword) {
-            res.status(400).json({
-                msg: "Old and new password required!!"
-            });
+            return res.status(400).json({ msg: "Old and new password required!!" });
         }
         const user = yield prisma.user.findUnique({
-            where: {
-                id: userId
-            }
+            where: { id: userId },
         });
         if (!user) {
-            return res.status(404).json({
-                msg: "user not found!!"
-            });
+            return res.status(404).json({ msg: "user not found!!" });
         }
         const isMatch = yield bcryptjs_1.default.compare(oldPassword, user.password);
         if (!isMatch) {
-            return res.status(401).json({
-                msg: "oldPassword is incorrect!!"
-            });
+            return res.status(401).json({ msg: "oldPassword is incorrect!!" });
         }
         const hashedPassword = yield bcryptjs_1.default.hash(newPassword, 10);
         yield prisma.user.update({
-            where: {
-                id: userId
-            }, data: {
-                password: hashedPassword
-            }
+            where: { id: userId },
+            data: { password: hashedPassword },
         });
-        return res.status(200).json({
-            msg: "Password updated successfully.."
-        });
+        return res.status(200).json({ msg: "Password updated successfully.." });
     }
-    catch (e) {
-        console.log(e);
-        return res.status(500).json({
-            msg: "Internal server error!!"
-        });
+    catch (_b) {
+        return res.status(500).json({ msg: "Internal server error!!" });
     }
 });
 exports.changePassword = changePassword;
@@ -176,23 +125,12 @@ const getSelfDetails = (req, res) => __awaiter(void 0, void 0, void 0, function*
         const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
         const selfDetail = yield prisma.user.findFirst({
             where: { id: userId },
-            select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { hostel: {
-                    select: {
-                        name: true
-                    }
-                }, student: {
-                    select: {
-                        regNo: true
-                    }
-                } })
+            select: Object.assign(Object.assign({}, userSelector_1.safeUserSelect), { hostel: { select: { name: true } }, student: { select: { regNo: true } } }),
         });
         return res.status(200).json(selfDetail);
     }
-    catch (e) {
-        console.log(e);
-        return res.status(500).json({
-            msg: "Internal server error!!"
-        });
+    catch (_b) {
+        return res.status(500).json({ msg: "Internal server error!!" });
     }
 });
 exports.getSelfDetails = getSelfDetails;
@@ -202,32 +140,24 @@ const updateSelfProfile = (req, res) => __awaiter(void 0, void 0, void 0, functi
         const id = (_a = req.user) === null || _a === void 0 ? void 0 : _a.id;
         const parsed = selfInput_1.updateSelfDetail.safeParse(req.body);
         if (!parsed.success) {
-            return res.status(401).json({
-                msg: "Incorrect inputs!!"
-            });
+            return res.status(401).json({ msg: "Incorrect inputs!!" });
         }
         yield prisma.user.update({
-            where: {
-                id: id
-            }, data: {
+            where: { id },
+            data: {
                 name: parsed.data.name,
                 mobNo: parsed.data.mobNo,
                 student: {
                     update: {
-                        regNo: parsed.data.regNo
-                    }
-                }
-            }
+                        regNo: parsed.data.regNo,
+                    },
+                },
+            },
         });
-        return res.status(200).json({
-            msg: "User updated successfully.."
-        });
+        return res.status(200).json({ msg: "User updated successfully.." });
     }
-    catch (e) {
-        console.log(e);
-        return res.status(500).json({
-            msg: "Internal server error!!"
-        });
+    catch (_b) {
+        return res.status(500).json({ msg: "Internal server error!!" });
     }
 });
 exports.updateSelfProfile = updateSelfProfile;
