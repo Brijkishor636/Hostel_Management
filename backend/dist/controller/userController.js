@@ -22,11 +22,7 @@ const userSelector_1 = require("../selectors/userSelector");
 const selfInput_1 = require("../inputs/selfInput");
 const prisma = new client_1.PrismaClient();
 const cookieOptions = {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
     maxAge: 60 * 60 * 1000,
-    path: "/",
 };
 const signin = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
