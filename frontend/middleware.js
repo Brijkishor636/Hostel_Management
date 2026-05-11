@@ -3,7 +3,8 @@ import { NextResponse } from "next/server";
 export function middleware(request) {
   const token = request.cookies.get("token")?.value;
   const role = request.cookies.get("role")?.value?.toLowerCase();
-  // console.log(role);
+  console.log(role);
+  console.log(token);
   const { pathname } = request.nextUrl;
 
   const isPublicRoute = pathname === "/login";
