@@ -10,7 +10,11 @@ import { updateSelfDetail } from "../inputs/selfInput";
 const prisma = new PrismaClient();
 
 const cookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none" as const,
   maxAge: 60 * 60 * 1000,
+  path: "/",
 };
 
 export const signin = async (req: Request, res: Response) => {
