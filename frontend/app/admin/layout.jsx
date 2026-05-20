@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Sidebar from "../../components/AdminDashboard/layout/Sidebar";
 import Navbar from "../../components/AdminDashboard/layout/Navbar";
+import ChatBot from "../../components/ChatBot";
 
 export default function AdminLayout({ children }) {
  const [mobileOpen, setMobileOpen] = useState(false);
@@ -29,7 +30,7 @@ export default function AdminLayout({ children }) {
             {children}
           </motion.div>
         </div>
-
+          <ChatBot/>
       </main>
     </div>
   );

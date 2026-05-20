@@ -45,14 +45,8 @@ export default function RoomsPage() {
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-[#050816] via-[#0b1120] to-[#111827] text-white">
       
-      {/* Sidebar */}
-      <Sidebar />
-
       {/* Main Content */}
       <div className="flex-1 p-8 space-y-8 overflow-y-auto">
-        
-        {/* Navbar */}
-        <Navbar />
 
         {/* Header */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
